@@ -315,10 +315,10 @@ Mỗi con số kèm một câu lý do, lấy từ `data/world.json` → `ops_lim
 
 | Khoá | Giá trị bàn đặt | Lý do (một câu, có số) |
 |---|---|---|
-| `business.daily_refund_cap_vnd` | | |
-| `business.cost_budget_per_ticket_vnd` | | |
-| `business.pilot_scope` (all / warehouse / percent) | | |
-| `business.roi_min` | | |
+| `business.daily_refund_cap_vnd` | 2000000 | Bằng ngân sách hoàn tự động mỗi ngày mà Ops và Finance đã thống nhất (`ops_limits.daily_auto_refund_budget_vnd` = 2.000.000đ); khoản làm vượt trần chuyển cho chị Hạnh duyệt. |
+| `business.cost_budget_per_ticket_vnd` | 1500 | Bằng trần tiền LLM mỗi ticket đã thống nhất (`ops_limits.max_llm_cost_per_ticket_vnd` = 1.500đ); ticket dài hơn thì chuyển người thay vì để máy đọc tốn tiền. |
+| `business.pilot_scope` (all / warehouse / percent) | all, 100% | Vòng 1 chưa có bằng chứng kho nào kém hơn (bộ nền có HN 7, HCM 5, DN 5, CT 4 ticket); thu hẹp khi chưa có số là cắt mù. Xét lại ở B8/C12 theo kho có số xấu nhất trong report. |
+| `business.roi_min` | 1.0 | Khớp `roi_min` trong tiêu chí đã ký (1.0); phải bù được phí giữ chỗ người trực 30.000đ/ca (`ops_facts.reviewer_standby_fee_vnd`). |
 
 ### B7.5 · Câu 2.10 · Cổng con người, vận hành, pháp lý + Runbook phần 1–3
 
