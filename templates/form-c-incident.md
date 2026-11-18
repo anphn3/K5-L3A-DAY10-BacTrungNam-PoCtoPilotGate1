@@ -249,9 +249,9 @@ Bắt buộc: ít nhất ba dòng, trong đó **một dòng là nhánh bàn chư
 
 ### Câu 3.2 · Một specification mà nếu bị vi phạm thì gây ra tác hại trên thẻ
 
-Kiểm được bằng code hoặc bằng một con số trong report: …
+Kiểm được bằng code hoặc bằng một con số trong report: **Mỗi lệnh `file_carrier_fault` phải ghi cho đúng một kiện thật sự trễ do hãng: `parcel_id` của lệnh là kiện có `delivered_date` muộn hơn `promised_date` theo tracking và có `delay_cause` thuộc `fault_causes` của chính sách đang hiệu lực, và `carrier_id` của lệnh phải đúng hãng chở chính kiện đó (không phải hãng của kiện đầu tiên trong đơn). Nếu không xác định được duy nhất một kiện như vậy (ticket không nêu `parcel_id` mà có từ hai kiện cùng trễ, hoặc kiện trễ không có nguyên nhân ghi nhận) thì không được ghi lỗi cho hãng nào; ticket chuyển người duyệt TRƯỚC bước `file_carrier_fault` và `notify_carrier`. Ngoài ra không hãng nào bị trợ lý tự ghi quá 2 lỗi trong một ngày (`ops_limits.max_auto_strikes_per_carrier_per_day` = 2); lỗi thứ 3 phải có người duyệt.**
 
-Kiểm bằng gì (hàm trong `guards.py`, dòng report nào): …
+Kiểm bằng gì (hàm trong `guards.py`, dòng report nào): **`write_gate` nhánh `tool == "file_carrier_fault"`: so `parcel_id`/`carrier_id` của lệnh với kiện trễ theo tracking, không khớp hoặc không xác định duy nhất thì `escalate`; đếm số lỗi đã ghi cho hãng trong ngày, chạm 2 thì lỗi tiếp theo `escalate`. Con số trong report: `lỗi hãng oan` = 0 trên `--suite S6` (ngưỡng đã ký `wrongful_carrier_faults_max` = 0), và khối "theo kho và hãng" không còn hãng nào (đặc biệt GHSH) có lỗi oan.**
 
 ### Câu 3.3 · Một giả định về môi trường mà người thiết kế đã ngầm tin, nhưng nhiều khả năng sai ngoài thực tế
 
