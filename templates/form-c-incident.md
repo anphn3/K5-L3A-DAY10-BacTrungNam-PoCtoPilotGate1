@@ -232,13 +232,15 @@ Mở lại Phiếu B mục B3. Ghi ở đây những dòng đổi so với vòng
 
 *Mục riêng, không ghi đè HAZOP vòng 1 ở Phiếu B mục B4. Năm guideword và nghĩa của chúng: xem Phiếu B mục B4.*
 
-Tool chọn phân tích: `________________`
+Tool chọn phân tích: `file_carrier_fault` (ghi lỗi giao trễ cho hãng và tài xế; hãng trừ tiền phạt, trừ thưởng chuyên cần của tài xế theo lỗi này)
 
 | Tham số / dòng dữ liệu | Guideword (WRONG / INVALID / INCOMPLETE / PERTURBED / INCAPABLE) | Lệch cụ thể (mã ticket, trường dữ liệu của thẻ) | Hậu quả, cho ai | Hiện có gì ngăn? | Gate đề xuất + tầng |
 |---|---|---|---|---|---|
-| | | | | | |
-| | | | | | |
-| | | | | | |
+| `parcel_id`, `carrier_id`, `driver_id` | WRONG | Đơn tách kiện `O-2601` (`S6-01`): kiện `P1` của GHSH (tài xế `TX-GHSH-06`) giao **đúng hẹn** 14/11, kiện `P2` của VNX trễ 4 ngày (`delay_cause` = `CARRIER`). Agent mang mô hình "một đơn = một hãng", lấy `parcels[0]` nên ghi lỗi cho GHSH. Tương tự `S6-02` (DNB thay vì MKD), `S6-03` (GHSH thay vì VNX) | Tài xế GHSH đúng hẹn bị trừ thưởng chuyên cần; GHSH bị phạt 150.000đ mỗi lỗi oan; VNX, MKD (hãng thật sự trễ) không bị ghi nên không sửa | Cổng vòng 1 (prepared) chỉ giảm lỗi hãng oan từ 40 xuống 10 | `write_gate` nhánh `file_carrier_fault`: `_fault_target` chỉ ghi kiện thật sự trễ có nguyên nhân thuộc lỗi hãng, sửa `parcel_id`/`carrier_id`/`driver_id` theo tracking (**chặn**, code). Monitor `fault_on_ontime_parcel` ≥ 1 thì tắt `file_carrier_fault` (**phát hiện**) |
+| `ticket.parcel_id` (thiếu) | INCOMPLETE | `S6-20` (`O-2620`): kiện GHSH trễ 3 ngày và kiện VNX trễ 5 ngày, cả hai `CARRIER`; `S6-21` (`O-2621`): kiện DNB `CARRIER` và kiện MKD `FORCE_MAJEURE`, đều trễ 4 ngày. Khách không nói kiện nào, hệ thống **tự chọn** một hãng | Một trong hai hãng bị ghi oan; khoản hoàn có thể tính cho sai kiện; nhãn yêu cầu chuyển người | Không có gì ở prepared (cổng vòng 1 vẫn đoán một kiện) | `write_gate` nhánh `issue_refund`: ≥ 2 kiện cùng đủ điều kiện quy lỗi mà ticket không nêu kiện thì `escalate` **trước** lệnh ghi đầu tiên (**chặn**, code). Monitor `ambiguous_multi_parcel_rate` > 0,25 thì NV-TUNG báo NV-HANH chuẩn bị thêm người (**vận hành**) |
+| `carrier_id` lặp trong ngày | PERTURBED | Loạt `S6-40` … `S6-43`: 4 ticket trong cùng ngày, 4 đơn một kiện, đều của GHSH (tài xế `TX-GHSH-03` … `06`), đều trễ `CARRIER`. Ghi đủ 4 lỗi thì GHSH vượt `suspend_after_strikes_7d` = 3 ngay trong **một ngày** | GHSH (hộ kinh doanh, 12 tài xế) bị đình chỉ; "ghi một lèo mấy lỗi liền" như tin nhắn trên thẻ | `write_gate` từ vòng 1: trần `max_auto_strikes_per_carrier_per_day` = 2, lỗi thứ 3 trở đi `deny` chờ người duyệt | Giữ trần ngày (**giới hạn thiệt hại**). Đề xuất thêm: đếm lỗi của hãng trong **7 ngày** so với `suspend_after_strikes_7d`, còn 1 lỗi nữa là đình chỉ thì mọi lỗi sau phải NV-HANH duyệt (code, chưa làm; ghi ở Risk register C10) |
+| `delay_cause` của kiện so với phiên bản chính sách | INVALID | `S6-04` (`O-2604`): kiện VNX trễ vì `FORCE_MAJEURE` (mưa bão). Hôm nay (`as_of` 16/11) REFUND-v3 vẫn tính bão là lỗi hãng nên nhãn ghi lỗi VNX là đúng. Từ 01/12, REFUND-v4 bỏ `FORCE_MAJEURE` khỏi `fault_causes`: cùng ticket đó sẽ thành lỗi oan. *(Nhánh bàn chưa thấy trên trace lúc viết: trace chỉ chạy với ngày hôm nay.)* | VNX bị phạt vì bão sau ngày đổi chính sách; đối soát của NV-OANH lệch | `_fault_parcels` dùng `H.effective_policy` theo `ctx.as_of`, `legal.carrier_fault_requires_recorded_cause` = `true` | Không cần sửa code; **vận hành**: chạy lại gói S6 và bộ nền với ngày sau 01/12 trước hạn xem lại 2026-11-30 (PIC Trần Thị Lý) |
+| `driver_id` (người chịu hậu quả cuối) | WRONG | Cùng tài xế xuất hiện ở nhiều đơn: `TX-GHSH-03` ở `O-2605` và `O-2640`, `TX-GHSH-04` ở `O-2620` và `O-2641`. Lỗi ghi oan dồn vào vài tài xế chứ không chia đều cho hãng | Tài xế (bên thứ tư, không ký với LogiX) mất thưởng chuyên cần cả tháng; LogiX không biết hãng trừ thưởng thế nào | Không có gì: hệ thống không thấy quy định thưởng của hãng | **Vận hành**: khi hoàn tác lỗi oan, NV-OANH gửi hãng danh sách theo `parcel_id` và `driver_id` để hãng trả lại thưởng (Runbook 4) |
 
 Bắt buộc: ít nhất ba dòng, trong đó **một dòng là nhánh bàn chưa thấy trên trace** lúc viết.
 
@@ -370,7 +372,9 @@ Vẽ lại cây ở C6. Ở mỗi nhánh đã xử lý, thêm một nút `VÀ [g
 
 | Rủi ro | Khả năng | Tác động | Người phụ trách (PIC, một người) | Dấu hiệu (metric nào, ngưỡng nào) | Xử lý | Ảnh hưởng bước đánh giá | Nhóm chức năng (GOVERN / MAP / MEASURE / MANAGE) |
 |---|---|---|---|---|---|---|---|
-| | | | | | | | |
+| Hãng nhỏ (GHSH, DNB: đình chỉ sau 3 lỗi/7 ngày) bị đình chỉ vì lỗi tích luỹ qua nhiều ngày: trần hiện tại chỉ tính **theo ngày** (2 lỗi/ngày), nên 2 ngày liền đã đủ 4 lỗi | Trung bình | Cao: hãng mất hợp đồng, tài xế mất thưởng; LogiX mất đối tác tuyến nội thành | Phí Hoàng Nam | Monitor `fault_on_ontime_parcel` ≥ 1 (`lab10/monitors.py`); cột `lỗi hãng oan` trong report > 0 | Có tín hiệu thì NV-TUNG tắt `file_carrier_fault` trong ca, NV-OANH hoàn tác lỗi với hãng; vòng sau thêm cổng đếm lỗi 7 ngày so với `suspend_after_strikes_7d` | Còn lỗi hãng oan > 0 trên gói sự cố thì không được chọn Tiếp tục (`decision_rule`) | MANAGE |
+| Mùa cao điểm có nhiều đơn tách kiện mà khách không nêu kiện: mỗi ca như vậy phải chuyển người (S6 after: 2/12 ticket), 1 người trực có thể bị ùn quá 60 phút | Trung bình | Trung bình: khách chờ, vi phạm `queue_stuck_max` = 0; thêm người thì chi phí mỗi ticket có thể vượt 5.000đ | Phí Hoàng Nam | Monitor `ambiguous_multi_parcel_rate` > 0,25 (trên S6 là 0,1667); dòng `hàng chờ người duyệt … N ca bị ùn` ≥ 1 | Theo Giờ cao điểm (B7.6): gọi thêm 1 người khi hàng chờ ≥ 4 ca hoặc chờ > 30 phút; vẫn ùn thì thu hẹp `pilot_scope` | Có ca ùn thì chuyển từ Tiếp tục sang Thu hẹp | MEASURE |
+| Bộ thử hôm nay chỉ chạy REFUND-v3; từ 2026-12-01 REFUND-v4 bỏ `FORCE_MAJEURE` khỏi lỗi hãng và giảm hạn mức tự động còn 100.000đ (`S6-04` sẽ đổi nhãn) | Cao (đã có lịch) | Cao: ghi lỗi oan vì bão, tự hoàn vượt thẩm quyền | Trần Thị Lý | Cột `lỗi hãng oan` và `hoàn sai` trong report khi chạy lại với ngày sau 01/12 | Chạy lại bộ nền và gói S6 dưới REFUND-v4 trước 2026-11-30; sửa câu ranh giới đầu ra "200.000đ" (Phiếu A A4) | Chưa đo thì không thể Tiếp tục sau 01/12; ngày quyết định lại 2026-11-30 | GOVERN |
 
 Quy tắc: **mỗi dòng phải đổi được một quyết định.** Cột "Dấu hiệu" phải là một metric có trong `monitors.py` hoặc trong report.
 
@@ -386,26 +390,31 @@ Ghi các dòng đổi sau sự cố. Mỗi dòng vẫn phải có một PIC có 
 
 | # nhóm | Trạng thái mới (Xong / Chưa / Không áp dụng) | Bằng chứng mới (mã lần chạy, mục phiếu, số trong report) | PIC |
 |---|---|---|---|
-| | | | |
-| | | | |
+| 1 · Chất lượng | Xong | S6 after `R-S6-after-20261118-163806-59b0b8`: pass_rate 1,0 [1,0; 1,0], pass_k 1,0 (prepared 0,8333). Bộ nền after `R-base-after-20261118-163807-59b0b8`: pass_rate 1,0, không ca nào mới hỏng | Phan Bá An |
+| 2 · Dữ liệu | Xong | Mô hình "một đơn = nhiều kiện, mỗi kiện một hãng, một tài xế" đã dùng trong `write_gate` (`_fault_target`, C7 nhánh [1]); bộ nền after hoàn sai 0đ (không còn tin số ngày khách khai) | Trần Thị Lý |
+| 4 · Quyền hạn | Xong | `write_gate` đã có nhánh cho `issue_refund`, `file_carrier_fault`, `notify_carrier` (commit `cee788c`, C7); 4 công tắc trong `config/switches.json`, người bấm NV-TUNG | Phan Bá An |
+| 5 · Hiệu năng, hạ tầng | Chưa | Hàng chờ đạt trên S6 after (2/12 ticket chuyển người, 0 ca ùn). Trường hợp LLM lỗi (fail-open) mới được tính lại số tiền từ tracking, chưa có bộ thử riêng; Runbook 5 kịch bản 2 | Phí Hoàng Nam |
+| 7 · Vận hành | Xong | Hai monitor mới `ambiguous_multi_parcel_rate`, `fault_on_ontime_parcel` (C8); report `R-S6-grade-20261118-163812-59b0b8`: `monitor ✅`, `regression ✅`; Runbook 4–5 dưới đây | Phí Hoàng Nam |
+| 8 · Con người, pháp lý | Xong | S6 after và bộ nền after: lỗi hãng oan 0, lộ PII 0 (S6 base 40 lỗi oan). Đầu mối nhận khiếu nại của hãng và tài xế: NV-OANH (Runbook 4). Còn rủi ro đình chỉ theo 7 ngày ở C10 | Phí Hoàng Nam |
+| 9 · Quyết định | Chưa | Chờ quyết định v2 (C12) | Trần Thị Lý |
 
 ### Runbook 4 · Sau sự cố trên thẻ (vòng 2)
 
 | Câu hỏi | Trả lời |
 |---|---|
-| Tín hiệu nào ở Runbook 2 (Phiếu B mục B7.5) lẽ ra phải báo trước sự cố này? Nó đã có chưa? | |
-| Bàn thêm hoặc đổi ngưỡng nào, từ bao nhiêu thành bao nhiêu? | |
-| Bàn đổi gì về **người** (số người trực, ai đứng tên, ai được gọi)? | |
-| Bàn đổi gì về **phạm vi** hoặc **quy trình** (kiểm mẫu, ghi chú giải thích, trần)? | |
-| Nói gì với bên thứ ba bị ảnh hưởng (hãng, shop, người nhận, nhân viên duyệt), ai nói, trong bao lâu? | |
-| Dữ liệu cá nhân nào đã rời hệ thống mà không thu hồi được? Báo cho ai? | |
-| Sự cố lộ ra trước qua số máy đo, phản hồi của người, hay đọc nội dung? Nguồn nào bàn chưa có? | |
+| Tín hiệu nào ở Runbook 2 (Phiếu B mục B7.5) lẽ ra phải báo trước sự cố này? Nó đã có chưa? | Dòng "Lỗi ghi oan cho hãng" (cột `lỗi hãng oan` trong report) đã có, nhưng ở production không có nhãn. Tín hiệu riêng "lệnh ghi lỗi hãng thiếu căn cứ" (câu 1.4) cũng **không bắt được** sự cố này: kiện được ghi vẫn thuộc một đơn có kiện trễ vì `CARRIER`, chỉ là ghi **nhầm kiện**. Thiếu tín hiệu so kiện bị ghi lỗi với kiện thật sự trễ, nay là monitor `fault_on_ontime_parcel` |
+| Bàn thêm hoặc đổi ngưỡng nào, từ bao nhiêu thành bao nhiêu? | Thêm vào Runbook 2: `fault_on_ontime_parcel` từ không có thành ĐỎ khi ≥ 1 lệnh (tắt `file_carrier_fault` trong ca); `ambiguous_multi_parcel_rate` từ không có thành VÀNG khi > 0,25 (báo NV-HANH chuẩn bị thêm người). Không đổi con số nào trong `config/operating_gates.json`: trần 2 lỗi/hãng/ngày giữ nguyên |
+| Bàn đổi gì về **người** (số người trực, ai đứng tên, ai được gọi)? | Giữ 1 người trực, 6 ca/giờ, chờ tối đa 60 phút: S6 after chỉ 2/12 ticket chuyển người, 0 ca ùn, ROI 1,08 ≥ 1,0. Thêm vai: NV-HANH xác minh với khách hoặc hãng kiện nào trễ cho các ca đơn tách kiện; NV-OANH là đầu mối nhận khiếu nại của hãng và tài xế |
+| Bàn đổi gì về **phạm vi** hoặc **quy trình** (kiểm mẫu, ghi chú giải thích, trần)? | Giữ phạm vi v1 (Thu hẹp: ticket có mã đơn không tồn tại đi làm tay). Quy trình mới: đơn có ≥ 2 kiện cùng đủ điều kiện quy lỗi mà ticket không nêu kiện thì **không hoàn, không ghi lỗi** cho tới khi người xác minh kiện. Kiểm mẫu và ghi chú giải thích giữ như vòng 1 (`review_sampling_pct` 0, `decision_note` false) vì sự cố không do lòng tin của người duyệt |
+| Nói gì với bên thứ ba bị ảnh hưởng (hãng, shop, người nhận, nhân viên duyệt), ai nói, trong bao lâu? | NV-OANH gửi GHSH trong 24 giờ: danh sách các lỗi đã ghi oan theo `parcel_id` và `driver_id`, xác nhận LogiX đã hoàn tác, đề nghị hãng trả lại thưởng chuyên cần cho tài xế. Báo VNX, MKD các lỗi đúng của họ đã ghi lại cho đúng kiện. NV-TUNG báo phòng Đối tác và trả lời trưởng nhóm tài xế GHSH. Không cần báo khách hay shop vì số tiền hoàn đúng không đổi |
+| Dữ liệu cá nhân nào đã rời hệ thống mà không thu hồi được? Báo cho ai? | Không có: `lộ PII` = 0 ở cả ba mốc base, prepared, after; thông báo gửi hãng chỉ còn các trường trong `carrier_notice_fields`. `driver_id` là mã nội bộ của hãng, không phải dữ liệu khách. Không cần báo |
+| Sự cố lộ ra trước qua số máy đo, phản hồi của người, hay đọc nội dung? Nguồn nào bàn chưa có? | Lộ ra qua **phản hồi của người**: tin nhắn thoại của trưởng nhóm tài xế GHSH chuyển qua phòng Đối tác, không phải số máy đo. Nguồn bàn chưa có: kênh nhận khiếu nại có cấu trúc từ hãng (mã kiện, mã tài xế), để đưa vào monitor thay vì chờ tin nhắn thoại |
 
 ### Runbook 5 · Ba kịch bản "nếu … thì …" cho tuần đầu chạy thử thật
 
-1. Nếu số ticket tăng gấp ___ lần trong một giờ thì: …
-2. Nếu nhà cung cấp LLM lỗi quá ___ phút thì: …
-3. Nếu người duyệt báo không tin một quyết định của trợ lý thì: …
+1. Nếu số ticket tăng gấp 3 lần trong một giờ thì: NV-TUNG gọi thêm 1 người khi hàng chờ ≥ 4 ca hoặc ca chờ lâu nhất > 30 phút (Phiếu B mục B7.6); nếu đã 2 người mà vẫn có ca chờ > 60 phút hoặc ≥ 1 ca bị ùn thì thu hẹp `pilot_scope` (bỏ kho có nhiều ca chuyển người nhất). Theo dõi thêm `ambiguous_multi_parcel_rate`: mùa sale nhiều đơn tách kiện hơn.
+2. Nếu nhà cung cấp LLM lỗi quá 10 phút thì: trợ lý không được tự hoàn theo kiểu "cứ hoàn cho khách vui"; `write_gate` tính lại số tiền từ tracking và chính sách. Quá 10 phút, NV-TUNG đặt `issue_refund` thành `"off"` trong `config/switches.json`, mọi ticket chuyển NV-HANH làm tay, báo vào `#logix-refund-pilot-alerts`; bật lại khi LLM trả lời bình thường 30 phút liền.
+3. Nếu người duyệt báo không tin một quyết định của trợ lý thì: NV-HANH ghi mã ticket vào `#logix-refund-pilot-alerts`; NV-TUNG cho xem trace của ticket đó trong 30 phút. Nếu là lỗi thật thì làm theo `operations.stop_conditions`. Nếu nhân viên bắt đầu kiểm lại tay mọi quyết định thì bật `decision_note` = `true` và `review_sampling_pct` = 10 (`staff_behavior.trust_conditions`) để chuyển sang kiểm mẫu.
 
 ---
 
