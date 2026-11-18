@@ -79,28 +79,30 @@ Ba loại lỗi:
 
 ### Phần 1 · Ghi lỗi (bằng chứng là mã ticket@seed và dòng trace, không tả chung chung)
 
+Nguồn bằng chứng: output `T-002@55`, suite `base`, stage `base` do Dương chạy và cung cấp. Bước sai đầu tiên là 03: `model_override` đổi độ trễ từ DB 2 ngày thành lời khách khai 5 ngày. Hai lỗi dưới đây là hai hậu quả của cùng lỗi nguồn này, không phải hai nguyên nhân độc lập.
+
 | # | Lỗi: người ta thấy gì (dán dòng trace / sổ cái) | Ai gặp, ai chịu | Hệ trọng (thấp / cao) | Loại lỗi (giới hạn hệ thống / ngữ cảnh / chìm) |
 |---|---|---|---|---|
-| 1 | | | | |
-| 2 | | | | |
+| 1 | `T-002@55`: bước 02 `db_delay_days: 2`; bước 03 `model_override` có `db: 2, ticket: 5`; bước 06 `issue_refund` ghi `amount_vnd: 20000, payer: LOGIX`; bước 09 báo khách đã hoàn 20.000đ. Nhãn yêu cầu hoàn 0đ, từ chối (hoặc chuyển người). | Khách nhận thông báo hoàn thành nên khó nhận ra sai; LogiX mất 20.000đ và kế toán phải đối soát khoản hoàn sai. | Cao | Lỗi chìm: kết quả báo `refunded`, không tự cảnh báo dù ghi tiền sai. |
+| 2 | `T-002@55`: bước 07 `file_carrier_fault` ghi hãng `VNX`, kiện `O-1002-P1`, tài xế `TX-VNX-03`, `delay_days: 5`; bước 08 gửi hãng độ trễ 5 ngày. Tracking của kiện là 2 ngày; nhãn `faults: []`. | Hãng VNX và tài xế bị quy lỗi không đúng điều kiện; kế toán LogiX phải xử lý chênh lệch. Trace chưa chứng minh có khoản phạt thực tế. | Cao | Lỗi chìm: khách thấy được hoàn tiền; luồng vẫn thành công, không phát hiện tác hại cho bên thứ ba. |
 
 ### Phần 2 · Tìm nguồn (đánh dấu câu nào đúng với từng lỗi)
 
 | Câu hỏi | Lỗi 1 | Lỗi 2 |
 |---|---|---|
-| **Đầu vào:** hệ thống có tự diễn giải / sửa đầu vào của người dùng theo cách họ không lường? Có đặt sai trọng số cho một lời nói hay tín hiệu của người dùng? | | |
-| **Độ liên quan:** hệ thống có thiếu dữ liệu cần để quyết đúng? Dữ liệu vào có nhiễu, thiếu ổn định? | | |
-| **Thứ bậc hệ thống:** có hai hệ thống cùng ghi / cùng theo dõi một thứ mà không rõ bên nào là chủ (ví dụ CSKH hoàn tay và trợ lý cùng ghi sổ)? | | |
-| **Trạng thái hỏng:** nhiều lỗi cộng lại có làm tính năng không dùng được (ví dụ LLM lỗi liên tiếp)? | | |
+| **Đầu vào:** hệ thống có tự diễn giải / sửa đầu vào của người dùng theo cách họ không lường? Có đặt sai trọng số cho một lời nói hay tín hiệu của người dùng? | Có: bước 01 `trust_claim: true`, bước 03 ưu tiên lời khách 5 ngày hơn DB 2 ngày, dẫn tới đề xuất hoàn sai. | Có: độ trễ sai tiếp tục được dùng để quyết định ghi lỗi hãng và thông báo cho hãng. |
+| **Độ liên quan:** hệ thống có thiếu dữ liệu cần để quyết đúng? Dữ liệu vào có nhiễu, thiếu ổn định? | Không thiếu độ trễ trong ca này: bước 02 đã có DB 2 ngày; vấn đề là bỏ qua nguồn đó. | Có dữ liệu tracking đúng kiện và hãng; agent vẫn ghi lỗi theo độ trễ đã bị ghi đè. Không có bằng chứng nguồn DB thiếu hoặc sai trong trace này. |
+| **Thứ bậc hệ thống:** có hai hệ thống cùng ghi / cùng theo dõi một thứ mà không rõ bên nào là chủ (ví dụ CSKH hoàn tay và trợ lý cùng ghi sổ)? | Chưa thấy bằng chứng hai bên cùng ghi tiền. Có xung đột nguồn xác định độ trễ: lời khách và tracking; cần quy định tracking làm căn cứ. | Chưa thấy nhiều hệ thống cùng ghi lỗi hãng. Có sự không nhất quán giữa tracking và bản ghi lỗi, cần đối chiếu trước thao tác ghi. |
+| **Trạng thái hỏng:** nhiều lỗi cộng lại có làm tính năng không dùng được (ví dụ LLM lỗi liên tiếp)? | Không thấy hệ thống ngừng hoạt động; bước 10 báo `refunded`. Đây là sai nghiệp vụ trong luồng thành công. | Sai độ trễ lan sang ghi lỗi và thông báo hãng. Chưa có bằng chứng lỗi LLM liên tiếp hay toàn hệ thống không dùng được. |
 
 ### Phần 3 · Hướng xử lý (mỗi lỗi một ô)
 
 | | Lỗi 1 | Lỗi 2 |
 |---|---|---|
-| Vì sao người gặp coi đây là lỗi | | |
-| Kiểu giải pháp: phản hồi cho người dùng / trao quyền kiểm soát cho người / khác | | |
-| Đường đi của người sau khi có giải pháp (ví dụ: ticket chuyển sang người duyệt → duyệt → khách được trả lời) | | |
-| Hệ thống học được gì (tín hiệu ghi lại để theo dõi: tên metric trong `monitors.py`) | | |
+| Vì sao người gặp coi đây là lỗi | Kế toán thấy LogiX trả 20.000đ cho ca mà nhãn yêu cầu 0đ; thông báo thành công che khuất lỗi nghiệp vụ. | Hãng bị ghi lỗi với độ trễ 5 ngày, trái tracking 2 ngày và nhãn không có lỗi hãng; làm sai căn cứ đối soát. |
+| Kiểu giải pháp: phản hồi cho người dùng / trao quyền kiểm soát cho người / khác | Cổng trước `issue_refund` đối chiếu tracking và chính sách hiệu lực. Nếu chưa xác minh được mâu thuẫn thì chuyển người trước khi ghi tiền; không tin số khách khai để tính tiền. | Cổng trước `file_carrier_fault` kiểm tra đúng kiện, hãng, độ trễ và nguyên nhân đủ điều kiện theo chính sách. Không ghi lỗi thiếu căn cứ; chuyển người khi cần xác minh. Cổng này không thay thế cổng tiền vì tiền được ghi trước lỗi hãng. |
+| Đường đi của người sau khi có giải pháp (ví dụ: ticket chuyển sang người duyệt → duyệt → khách được trả lời) | Khi phải chuyển người: giữ chưa ghi tiền → người duyệt kiểm tra tracking/chính sách → từ chối hoặc xử lý theo bằng chứng → trả lời khách rõ kết quả. Khoản sai đã ghi cần đối soát theo quy trình, không tự động thu hồi từ khách. | Dừng thao tác ghi thiếu căn cứ → người phụ trách đối soát xác minh → chỉ ghi hoặc điều chỉnh theo kết quả kiểm chứng → thông báo hãng qua quy trình được duyệt. |
+| Hệ thống học được gì (tín hiệu ghi lại để theo dõi: tên metric trong `monitors.py`) | Đề xuất `model_override_rate`: số trial có sự kiện `model_override` chia tổng trial; đối chiếu thêm số thao tác hoàn bị cổng chặn. Chưa triển khai trong `monitors.py`. | Đề xuất `unsupported_carrier_fault_count`: số lệnh ghi lỗi thiếu căn cứ tracking/chính sách của đúng kiện; cần snapshot nguồn tại thời điểm ghi. Chưa triển khai trong `monitors.py`. |
 
 **Ví dụ (bộ nền, đừng chép):** `T-002@55` · sổ cái có dòng hoàn 20.000đ, hãng VNX nhận một lỗi, trong khi tracking ghi trễ 2 ngày ·
 khách không thấy gì sai, hãng chịu · cao · **lỗi chìm**. Nguồn: đầu vào (đặt sai trọng số cho con số khách tự khai). Xử lý:
