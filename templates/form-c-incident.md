@@ -161,19 +161,19 @@ duyệt, chờ duyệt, trần).
 **Cách làm:** thảo luận theo nhóm rồi ghi cho **từng nhóm người dùng**: họ là ai, mục tiêu chính là gì, và hiện
 nay họ làm việc này **từng bước ra sao**, đồng đều hay mỗi nơi một kiểu. Dòng cuối: **hệ thống đang mang hình dung nào**, đọc từ trace.
 
-| | Nhóm A: `__________` (gợi ý: điều phối / tài xế của hãng) | Nhóm B: `__________` (gợi ý: kế toán đối soát hoặc CSKH) |
+| | Nhóm A: **Điều phối / trưởng nhóm tài xế của hãng** (ví dụ GHSH, Sông Hồng) | Nhóm B: **Kế toán đối soát** (NV-OANH, Phạm Kiều Oanh) |
 |---|---|---|
-| Họ là ai, chạm vào kết quả của trợ lý ở đâu | | |
-| Mục tiêu chính của họ | | |
-| Hiện nay họ xác định "ai chịu lỗi giao trễ" theo các bước nào | | |
-| Cách làm đó đồng đều hay mỗi nơi một kiểu | | |
-| Theo hình dung của họ, **đơn vị chịu lỗi** là gì (đơn / kiện / chặng / tài xế)? | | |
+| Họ là ai, chạm vào kết quả của trợ lý ở đâu | Nhận thông báo lỗi (`notify_carrier`) và bị trừ thưởng chuyên cần / phạt 150.000đ mỗi lỗi; GHSH bị đình chỉ sau 3 lỗi trong 7 ngày (`carriers`) | Khớp sổ hoàn tiền và sổ lỗi hãng với hãng và shop mỗi tuần; nhận khiếu nại của hãng khi lỗi bị ghi sai |
+| Mục tiêu chính của họ | Chỉ nhận lỗi cho kiện chính tài xế của mình chở trễ; giữ thưởng và không bị đình chỉ | Mỗi lỗi ghi cho hãng đúng kiện, đúng hãng, có bằng chứng tracking, để đối soát không phải gỡ lại |
+| Hiện nay họ xác định "ai chịu lỗi giao trễ" theo các bước nào | Tra mã kiện → xem chặng và tài xế chở kiện đó → so ngày giao thật với ngày hẹn của **chính kiện đó** → kiện đúng hẹn thì không nhận lỗi | Lấy đơn → tách từng kiện → mỗi kiện đối chiếu `carrier_id`, `driver_id`, `promised_date`/`delivered_date`, `delay_cause` → chỉ ghi lỗi cho kiện trễ do hãng; nhiều kiện cùng trễ mà không rõ kiện nào khách khiếu nại thì hỏi lại hoặc chuyển người |
+| Cách làm đó đồng đều hay mỗi nơi một kiểu | Mỗi hãng một kiểu (hãng nhỏ tra tay qua trưởng nhóm, hãng lớn có hệ thống), nhưng đều tính theo **kiện / tài xế** | Đồng đều theo quy trình đối soát tuần, luôn theo **kiện** |
+| Theo hình dung của họ, **đơn vị chịu lỗi** là gì (đơn / kiện / chặng / tài xế)? | **Kiện**, và cụ thể là **tài xế** chở kiện đó | **Kiện** (kèm hãng và tài xế của kiện) |
 
 **Hệ thống đang mang hình dung nào?** (đọc trace một ticket hỏng: `tracking.parcels` so với dòng `file_carrier_fault`)
 
-- Với hệ thống, đơn vị chịu lỗi là: `__________`. Bằng chứng: ticket `______@seed ____`, dòng trace: `__________`.
-- Chỗ hai hình dung vênh nhau: `__________`.
-- Khi đầu vào không đủ để áp hình dung của con người (không biết kiện nào), hệ thống đang làm gì: `__________`; nên làm gì: `__________`.
+- Với hệ thống, đơn vị chịu lỗi là: **cả đơn, đại diện bằng kiện đầu tiên (`parcels[0]`)**. Bằng chứng: ticket **`S6-01@seed 11`** (mốc base), dòng trace: bước 02 `tracking.parcels` = `[O-2601-P1 GHSH delay 0, O-2601-P2 VNX delay 4]`, nhưng bước 06 `file_carrier_fault` ghi **`parcel_id: O-2601-P1, carrier_id: GHSH, driver_id: TX-GHSH-06, delay_days: 4`**: lấy độ trễ của cả đơn gán cho kiện đúng hẹn của GHSH, trong khi nhãn là lỗi của VNX kiện P2.
+- Chỗ hai hình dung vênh nhau: **con người tính lỗi theo từng kiện và tài xế chở kiện đó; hệ thống tính theo đơn, mặc định kiện đầu tiên là "đại diện"**, nên ở đơn tách kiện hãng chở kiện đầu (thường là hãng giao chặng đầu, ở đây GHSH) gánh lỗi của hãng khác. Thêm nữa, hệ thống ghi lỗi tự động liên tục cho cùng một hãng trong ngày, trong khi trần Ops là 2 lỗi/hãng/ngày (`ops_limits.max_auto_strikes_per_carrier_per_day`).
+- Khi đầu vào không đủ để áp hình dung của con người (không biết kiện nào), hệ thống đang làm gì: **tự đoán: ticket `S6-20@11` không nêu kiện, hai kiện cùng trễ (GHSH 3 ngày, VNX 5 ngày), hệ thống vẫn hoàn 26.000đ và ghi lỗi cho GHSH (kiện đầu); nhãn là `escalated`, 0đ, không ghi lỗi**; nên làm gì: **không đoán: dừng TRƯỚC `issue_refund` và `file_carrier_fault`, chuyển người duyệt (NV-HANH) xác định kiện nào khách khiếu nại; chỉ ghi lỗi khi xác định được duy nhất một kiện trễ do hãng, và ghi cho đúng hãng, tài xế của kiện đó.**
 
 → Mỗi chỗ vênh là một nhánh của fault tree. Gate tốt làm cho hệ thống hành xử theo hình dung của người chịu hậu quả.
 
@@ -256,9 +256,9 @@ Kiểm bằng gì (hàm trong `guards.py`, dòng report nào): **`write_gate` nh
 
 ### Câu 3.3 · Một giả định về môi trường mà người thiết kế đã ngầm tin, nhưng nhiều khả năng sai ngoài thực tế
 
-Giả định (thứ nằm NGOÀI phần mềm): …
+Giả định (thứ nằm NGOÀI phần mềm): **Mỗi đơn hàng do một hãng giao trọn; nếu đơn có nhiều kiện thì các kiện đi cùng nhau, cùng đúng hẹn hoặc cùng trễ, nên "đơn trễ" đồng nghĩa với "hãng của đơn có lỗi". Kèm theo: khách khi khiếu nại sẽ nói rõ kiện nào trễ.**
 
-Vì sao có thể sai: …
+Vì sao có thể sai: **Ngoài vận hành thật, đơn hay bị tách kiện (hàng ở nhiều kho, hàng cồng kềnh, hết hàng một phần) và mỗi kiện đi một hãng, một tài xế, tới vào những ngày khác nhau: `S6-01` có kiện GHSH đúng hẹn và kiện VNX trễ 4 ngày; `S6-20` có cả hai hãng cùng trễ. Khách thường chỉ thấy "đơn của tôi giao chậm" và không biết mã kiện (`S6-20`: "Đơn của tôi giao chậm, xin hoàn phí ship."). Hãng nhỏ như GHSH lại hay chở chặng/kiện đầu, nên là bên gánh lỗi oan nhiều nhất.**
 
 ---
 
