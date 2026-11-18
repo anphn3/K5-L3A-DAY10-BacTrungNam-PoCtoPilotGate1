@@ -423,18 +423,18 @@ bao nhiêu thời gian? (3) Có phần nào của dự án không nên làm ti�
 | Hash chốt cổng vòng 1 (8 ký tự lệnh `lab10.checkpoint` in ra, tuỳ chọn) | `7365d885` (2026-11-18 16:12:26, commit `8cd3e01`) |
 | Mã lần chạy dùng làm bằng chứng | bộ nền, mốc base: `R-base-before-20261118-154922-e115de` · bộ nền với cổng vòng 1 (prepared): `R-base-prepared-20261118-161233-4b74a2` |
 | Còn dòng "vượt trần" nào trong report? (hàng chờ, chi phí, ROI, trần tiền, pháp lý) | Không: "vượt trần: không". Hàng chờ 0 ca ùn (chờ lâu nhất 0 phút / hạn 60), chi phí 4.187đ ≤ 5.000đ, ROI 1.39 ≥ 1.0, hoàn tự động ngày 155.000đ ≤ trần 2.000.000đ, lỗi hãng oan 0, lộ dữ liệu 0 |
-| Kho hoặc hãng có số xấu nhất: ____. Nếu chỉ nhìn phân khúc này, quyết định có đổi không? *(Đọc khối "theo kho và hãng" ở cuối output `lab10.eval` / `lab10.grade`, hoặc mục `by_segment` trong `report.json`.)* | Ở prepared mọi kho và hãng đều pass_rate 1.0, không hoàn sai, không lỗi hãng oan. Số xấu nhất là **chi phí** của nhóm kho `?` (đơn không xác định kho, 5 lần chạy): **10.200đ/ticket, đắt hơn làm tay 10.000đ**. Ở base, kho HCM / hãng VNX là nơi có lần chạy hỏng `T-002@55`. *(Lý điền: nhóm `?` có làm đổi quyết định không)* |
-| Quyết định (khoanh một) | Tiếp tục · Thu hẹp · Cải tiến thêm · Dừng |
-| Bằng chứng 1: mã lần chạy + chỉ số bắt buộc nào đạt / chưa | |
-| Bằng chứng 2 | |
-| Bằng chứng 3 | |
-| Khớp dòng nào trong `decision_rule` đã ký? | |
-| Nếu Thu hẹp: cắt phần nào, vì sao | |
-| Nếu Cải tiến thêm: giả thuyết cụ thể + hạn | |
-| Nếu Dừng: bài học ghi lại | |
-| Một bằng chứng còn thiếu (thứ bộ nền chưa đo được) | |
-| Ngày quyết định lại (trừ khi Dừng) | |
-| PIC ký | |
+| Kho hoặc hãng có số xấu nhất: ____. Nếu chỉ nhìn phân khúc này, quyết định có đổi không? *(Đọc khối "theo kho và hãng" ở cuối output `lab10.eval` / `lab10.grade`, hoặc mục `by_segment` trong `report.json`.)* | Ở prepared mọi kho và hãng đều có pass_rate 1,0 và ba chỉ số an toàn bằng 0. Phân khúc xấu nhất là **nhóm kho `?`** (ticket `T-018`, mã đơn `O-9999` không tồn tại): **10.200đ/ticket, đắt hơn làm tay (10.000đ)** và vượt ngưỡng đã ký 5.000đ, trong khi chi phí chung chỉ 4.187đ. Ở base, kho HCM / hãng VNX xấu nhất (hoàn sai 20.000đ, 1 lỗi hãng oan, đều từ `T-002@55`) nhưng cổng vòng 1 đã sửa. Có đổi: nhìn riêng phân khúc này thì không thể Tiếp tục mà phải cắt nó ra, nên quyết định là Thu hẹp |
+| Quyết định (khoanh một) | Tiếp tục · **Thu hẹp** · Cải tiến thêm · Dừng |
+| Bằng chứng 1: mã lần chạy + chỉ số bắt buộc nào đạt / chưa | `R-base-prepared-20261118-161233-4b74a2`: ba chỉ số an toàn đều đạt: hoàn sai 0đ, lỗi hãng oan 0, lộ dữ liệu 0 (base `R-base-before-20261118-154922-e115de` là 20.000đ · 1 · 0, cổng vòng 1 đã đưa về 0) |
+| Bằng chứng 2 | `R-base-prepared-20261118-161233-4b74a2`: pass_rate 1,0 [1,0; 1,0] ≥ 0,97; pass_k 1,0 ≥ 0,95; tỉ lệ chuyển người 0,2273 ≤ 0,35; không ca ùn (chờ lâu nhất 0/60 phút); hoàn tự động trong ngày 155.000đ ≤ trần 2.000.000đ |
+| Bằng chứng 3 | `R-base-prepared-20261118-161233-4b74a2`: chi phí chung 4.187đ/ticket ≤ 5.000đ, ROI 1,39 ≥ 1,0; **nhưng** phân khúc ticket có mã đơn không tồn tại (nhóm kho `?`, `T-018`) tốn 10.200đ/ticket, vượt `cost_per_ticket_vnd_max` = 5.000đ và đắt hơn làm tay |
+| Khớp dòng nào trong `decision_rule` đã ký? | **"Thu hẹp"**: ba chỉ số an toàn đều bằng 0, nhưng một ngưỡng business_ops (chi phí mỗi ticket ≤ 5.000đ) chưa đạt ở một loại ticket khoanh được (mã đơn không tồn tại); cắt phần đó, độ phủ còn lại lớn hơn 0. **Không chọn "Tiếp tục"** vì dòng đã ký yêu cầu đạt trên bộ nền **VÀ trên gói sự cố**, mà gói sự cố chưa đo (thẻ phát ở phút 125) |
+| Nếu Thu hẹp: cắt phần nào, vì sao | Cắt **ticket có mã đơn không tồn tại trong hệ thống** (như `T-018`, `O-9999`): đi thẳng quy trình làm tay, máy không đọc. Lý do: loại ticket này luôn phải chuyển người (nhãn `escalated`) nên trợ lý chỉ tốn thêm tiền máy mà không tự động được gì, và đây là chỗ dễ lọt ticket rác hoặc ticket cài lệnh. Thực hiện bằng cổng `pre_guard` (chuyển người khi không tìm thấy đơn), **không bằng `pilot_scope`**, vì `lab10/ops.py` giữ ticket không tìm thấy đơn trong phạm vi. Phần còn lại: 21/22 ticket, cả 4 kho HN, HCM, DN, CT, 100% |
+| Nếu Cải tiến thêm: giả thuyết cụ thể + hạn | (không áp dụng) |
+| Nếu Dừng: bài học ghi lại | (không áp dụng) |
+| Một bằng chứng còn thiếu (thứ bộ nền chưa đo được) | **Gói sự cố chưa đo**: vế thứ hai của dòng "Tiếp tục" đã ký chưa có số, nên chưa thể Tiếp tục. Ngoài ra bộ nền chỉ dùng REFUND-v3, chưa đo dưới REFUND-v4 (hiệu lực 2026-12-01: hạn mức tự hoàn 100.000đ, trễ do bão không ghi lỗi hãng), và chưa đo khi lượng ticket gấp ba giờ cao điểm |
+| Ngày quyết định lại (trừ khi Dừng) | Vòng 2 hôm nay (sau khi có gói sự cố, Phiếu C mục C12); hạn chót xem lại tiêu chí **2026-11-30**, trước khi REFUND-v4 có hiệu lực. Dự: P3 (Trần Thị Lý), P4, NV-OANH, NV-HANH |
+| PIC ký | NV-TUNG (Lê Thanh Tùng, PIC trợ lý) · người viết quyết định: Trần Thị Lý (P3) |
 
 Xong v1 thì lưu và đẩy một bản (sau mốc này không sửa cột v1):
 
