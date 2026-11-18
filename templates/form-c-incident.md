@@ -443,30 +443,30 @@ Cột v1 nằm ở Phiếu B mục B8; không sửa cột đó.
 
 | | **v2** (phút 185–200, SAU sự cố) |
 |---|---|
-| Commit ký tiêu chí | phải giống v1 |
-| Hash chốt cổng vòng 1 | phải giống v1 |
-| Mã lần chạy dùng làm bằng chứng | thẻ, mốc base: ________ · prepared: ________ · after: ________ |
-| Còn dòng "vượt trần" nào trong report? (hàng chờ, chi phí, ROI, trần tiền, pháp lý) | |
-| Kho hoặc hãng có số xấu nhất: ____. Nếu chỉ nhìn phân khúc này, quyết định có đổi không? *(Khối "theo kho và hãng" trong output `lab10.eval` / `lab10.grade`, hoặc mục `by_segment` trong `report.json`.)* | |
-| Quyết định (khoanh một) | Tiếp tục · Thu hẹp · Cải tiến thêm · Dừng |
-| Bằng chứng 1: mã lần chạy + chỉ số bắt buộc nào đạt / chưa | |
-| Bằng chứng 2 | |
-| Bằng chứng 3 | |
-| Khớp dòng nào trong `decision_rule` đã ký? | |
-| Nếu Thu hẹp: cắt kho nào / còn bao nhiêu phần trăm / mấy người trực, và ticket bị cắt đi đâu | |
-| Nếu Cải tiến thêm: giả thuyết cụ thể (nhánh nào của fault tree) + hạn | |
-| Nếu Dừng: bài học ghi lại | |
-| Ngày quyết định lại (trừ khi Dừng) | |
-| PIC ký | |
+| Commit ký tiêu chí | `bcd0a06` (`Sign acceptance criteria`, hash tiêu chí `8433f76d`), giống v1 |
+| Hash chốt cổng vòng 1 | `7365d885`, giống v1 |
+| Mã lần chạy dùng làm bằng chứng | thẻ, mốc base: `R-S6-before-20261118-163815-59b0b8` · prepared: `R-S6-prepared-20261118-163816-59b0b8` · after: `R-S6-after-20261118-163816-59b0b8` (grade `R-S6-grade-20261118-163815-59b0b8`; bộ nền after `R-base-after-20261118-163807-59b0b8`) |
+| Còn dòng "vượt trần" nào trong report? (hàng chờ, chi phí, ROI, trần tiền, pháp lý) | Không: report ghi "Không vượt trần kinh doanh / vận hành nào" và "Mọi ngưỡng đã ký đều đạt". (Ở prepared còn vượt: ROI 0,74 < 1,0, hoàn sai 270.000đ, 10 lỗi hãng oan.) |
+| Kho hoặc hãng có số xấu nhất: ____. Nếu chỉ nhìn phân khúc này, quyết định có đổi không? *(Khối "theo kho và hãng" trong output `lab10.eval` / `lab10.grade`, hoặc mục `by_segment` trong `report.json`.)* | **Kho HCM**: đúng 100%, không hoàn sai, không lỗi oan, nhưng **5.617đ/ticket, vượt `cost_per_ticket_vnd_max` = 5.000đ đã ký** (vẫn rẻ hơn làm tay 10.000đ). Nguyên nhân: hai ca không xác định được kiện nào lỗi (`S6-20`, `S6-21`, đơn tách kiện, hai hãng cùng trễ, khách không nêu kiện) đều ở HCM và được chuyển người duyệt. Nhìn phân khúc này thì **không chọn Tiếp tục**, nhưng cũng **không cắt kho HCM** (trợ lý đúng 100% ở các ticket khác của HCM); cắt đúng **loại ticket** gây vượt |
+| Quyết định (khoanh một) | Tiếp tục · **Thu hẹp** · Cải tiến thêm · Dừng |
+| Bằng chứng 1: mã lần chạy + chỉ số bắt buộc nào đạt / chưa | `R-S6-after-20261118-163816-59b0b8`: pass_rate 1,0, pass_k 1,0; hoàn sai 0đ · lỗi hãng oan 0 · lộ dữ liệu 0 (prepared 270.000đ · 10 · 0; base 270.000đ · 40 · 0): cả 5 ngưỡng bắt buộc đạt trên gói sự cố |
+| Bằng chứng 2 | `R-base-after-20261118-163807-59b0b8`: bộ nền vẫn pass_rate 1,0, pass_k 1,0, 0 · 0 · 0, chi phí 4.187đ, ROI 1,39: không ca nào của bộ nền bị hỏng sau khi sửa (regression ✅) |
+| Bằng chứng 3 | `R-S6-after-20261118-163816-59b0b8`: chi phí chung 4.817đ/ticket ≤ 5.000đ, ROI 1,08 ≥ 1,0 (biên mỏng), chuyển người 16,7%; **riêng kho HCM 5.617đ/ticket > 5.000đ**, do loại ticket "không xác định được kiện chịu lỗi" |
+| Khớp dòng nào trong `decision_rule` đã ký? | **"Thu hẹp"**: ba chỉ số an toàn đều bằng 0, nhưng một ngưỡng business_ops (chi phí mỗi ticket ≤ 5.000đ) chưa đạt ở một **loại ticket** khoanh được; cắt phần đó, độ phủ còn lại lớn hơn 0. Cùng lý lẽ như v1 |
+| Nếu Thu hẹp: cắt kho nào / còn bao nhiêu phần trăm / mấy người trực, và ticket bị cắt đi đâu | **Không cắt kho**: giữ cả 4 kho HN, HCM, DN, CT, 100%, 1 người trực (NV-HANH, 6 ca/giờ). **Cắt loại ticket mà dữ liệu không đủ xác định bên chịu trách nhiệm**: (a) đơn tách kiện có từ 2 kiện cùng đủ điều kiện quy lỗi mà ticket không nêu kiện (`S6-20`, `S6-21`); (b) mã đơn không tồn tại (`T-018`, đã cắt ở v1). Những ticket này **không tự hoàn, không tự ghi lỗi hãng**, đi thẳng hàng chờ NV-HANH (SLA 60 phút), do `write_gate` vòng 2 chuyển người TRƯỚC `issue_refund`. Không dùng `pilot_scope` vì khoá này chỉ cắt theo kho hoặc phần trăm |
+| Nếu Cải tiến thêm: giả thuyết cụ thể (nhánh nào của fault tree) + hạn | (không áp dụng) |
+| Nếu Dừng: bài học ghi lại | (không áp dụng) |
+| Ngày quyết định lại (trừ khi Dừng) | **2026-11-30**, trước khi REFUND-v4 có hiệu lực; và sau khi team chấm chạy bộ test ẩn. Dự: Trần Thị Lý (P3), Phí Hoàng Nam (P4), NV-OANH, NV-HANH |
+| PIC ký | NV-TUNG (Lê Thanh Tùng, PIC trợ lý) · người viết quyết định: Trần Thị Lý (P3) |
 
 **Chỉ ở v2**
-- Quyết định đổi hay giữ so với v1? Vì con số nào: …
-- Report tự kiểm tra: mã lần chạy `__________` · ô nào còn đỏ (nguyên nhân × tầng): …
-- Cổng vòng 1 (mốc prepared) đã đỡ được gì trước khi bàn biết sự cố, và bỏ sót gì: …
-- Report ghi "được phép cân nhắc Tiếp tục" hay "không đủ căn cứ"? Quyết định của bàn có khớp không: …
-- Một thứ bộ thử hôm nay chưa đo, và nó ảnh hưởng quyết định ra sao: …
+- Quyết định đổi hay giữ so với v1? Vì con số nào: **Giữ Thu hẹp.** Lý do v1 không chọn Tiếp tục (gói sự cố chưa đo) đã được giải quyết: S6 after đạt cả 5 ngưỡng bắt buộc (0 · 0 · 0). Nhưng lý do Thu hẹp vẫn còn và rõ hơn: kho HCM 5.617đ/ticket > 5.000đ, toàn bộ phần vượt đến từ loại ticket không xác định được kiện chịu lỗi; cùng loại với ticket mã đơn không tồn tại đã cắt ở v1.
+- Report tự kiểm tra: mã lần chạy `R-S6-grade-20261118-163815-59b0b8` · ô nào còn đỏ (nguyên nhân × tầng): **chỉ "1 integrity"**, đỏ vì repo của bàn chỉ có thẻ S6, thiếu thẻ các bàn khác (không do bàn sửa file khoá; đã hỏi Lab Coach). Bảng "nguyên nhân × tầng" **chưa có trên máy bàn**, chỉ hiện khi team chấm chạy bộ test ẩn.
+- Cổng vòng 1 (mốc prepared) đã đỡ được gì trước khi bàn biết sự cố, và bỏ sót gì: **Đỡ được** lỗi hãng oan 40 → 10 và pass_rate 0,33 → 0,83 (cổng không ghi lỗi hãng khi thiếu nguyên nhân, không tin số khách khai). **Bỏ sót** đơn tách kiện: vẫn 270.000đ hoàn sai, 10 lỗi oan và ROI 0,74 < 1,0, vì cổng vòng 1 không xét "kiện nào của hãng nào" và vẫn tự chọn một kiện khi nhiều kiện cùng trễ (`S6-20@11`).
+- Report ghi "được phép cân nhắc Tiếp tục" hay "không đủ căn cứ"? Quyết định của bàn có khớp không: Report ghi **"Được phép cân nhắc Tiếp tục"**. Bàn chọn **Thu hẹp**, chặt hơn report nhưng vẫn khớp: report cho phép chứ không bắt buộc Tiếp tục, và luật đã ký của bàn xét cả phân khúc (kho HCM vượt 5.000đ).
+- Một thứ bộ thử hôm nay chưa đo, và nó ảnh hưởng quyết định ra sao: **Bộ test ẩn** (đơn mới, khách mới, cách viết khác) và **tỉ lệ đơn tách kiện thật**. Nếu đơn tách kiện mà khách không nêu kiện nhiều hơn mock, số ca chuyển người tăng, ROI (hiện 1,08, sát ngưỡng 1,0) có thể xuống dưới 1,0, khi đó phải cân nhắc lại phạm vi hoặc số người trực.
 
 **Ba dòng bắt buộc** (chép nguyên ba câu này sang `submission/submission.json`, mục `three_lines`)
-1. Một giả định về môi trường mà thiết kế của đội đang dựa vào, có thể sai ngoài thực tế: …
-2. Gate của đội chỉ GIẢM khả năng hay thực sự NGĂN được tác hại? Vì sao: …
-3. Vì data là mock, cần đo lại gì trong pilot thật trước Bước đánh giá 2: …
+1. Một giả định về môi trường mà thiết kế của đội đang dựa vào, có thể sai ngoài thực tế: Tracking của từng kiện (hãng chở, ngày giao thật, nguyên nhân trễ) được hãng và điểm phát nhập đầy đủ, đúng và kịp thời; ngoài thực tế hãng nhỏ hay quét sót, nhập bù ngày giao bằng tay, ghi nguyên nhân sơ sài, và khách hiếm khi nói rõ kiện nào trễ.
+2. Gate của đội chỉ GIẢM khả năng hay thực sự NGĂN được tác hại? Vì sao: Chỉ GIẢM. `write_gate` ngăn được việc trợ lý tự đoán kiện (nhiều kiện cùng đủ điều kiện mà ticket không nêu kiện thì chuyển người trước khi hoàn tiền và ghi lỗi), nhưng vẫn tin tracking: nếu hãng nhập sai ngày giao hoặc nguyên nhân thì cổng vẫn ghi lỗi oan; phần còn lại dựa vào người duyệt NV-HANH và đối soát tuần của NV-OANH.
+3. Vì data là mock, cần đo lại gì trong pilot thật trước Bước đánh giá 2: Tỉ lệ đơn tách kiện và tỉ lệ ticket không nêu kiện nào trễ (quyết định số ca chuyển người, chi phí mỗi ticket và ROI, hiện chỉ 1,08); độ chính xác và độ trễ cập nhật tracking theo từng hãng (đặc biệt hãng nhỏ như GHSH); số lỗi hãng bị khiếu nại hoặc phải hoàn tác mỗi tuần.
