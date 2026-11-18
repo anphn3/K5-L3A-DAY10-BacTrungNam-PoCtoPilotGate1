@@ -1,17 +1,17 @@
 {
-  "team": "BacTrungNam",
+  "team": "K5-L3A-DAY10-BacTrungNam-PoCtoPilotGate1",
   "members": [
-    "Phan Bá An-2A202603375",
-    "Nguyễn Thuỳ Dương-2A202603388",
-    "Trần Thị Ly-2A202603404",
-    "Phí Hoàng Nam-2A202603435"
+    "PhanBaAn-2A202603375",
+    "NguyenThuyDuong-2A202603388",
+    "TranThiLy-2A202603404",
+    "PhiHoangNam-2A202603435"
   ],
   "incident": "S6",
   "decision_v1": "Thu hẹp",
-  "decision_v2": "",
+  "decision_v2": "Thu hẹp",
   "three_lines": {
-    "environment_assumption": "",
-    "reduce_or_prevent": "",
-    "measure_in_pilot": ""
+    "environment_assumption": "Tracking của từng kiện (hãng chở, ngày giao thật, nguyên nhân trễ) được hãng và điểm phát nhập đầy đủ, đúng và kịp thời; ngoài thực tế hãng nhỏ hay quét sót, nhập bù ngày giao bằng tay, ghi nguyên nhân sơ sài, và khách hiếm khi nói rõ kiện nào trễ.",
+    "reduce_or_prevent": "Chỉ GIẢM. `write_gate` ngăn được việc trợ lý tự đoán kiện (nhiều kiện cùng đủ điều kiện mà ticket không nêu kiện thì chuyển người trước khi hoàn tiền và ghi lỗi), nhưng vẫn tin tracking: nếu hãng nhập sai ngày giao hoặc nguyên nhân thì cổng vẫn ghi lỗi oan; phần còn lại dựa vào người duyệt NV-HANH và đối soát tuần của NV-OANH.",
+    "measure_in_pilot": "Tỉ lệ đơn tách kiện và tỉ lệ ticket không nêu kiện nào trễ (quyết định số ca chuyển người, chi phí mỗi ticket và ROI, hiện chỉ 1,08); độ chính xác và độ trễ cập nhật tracking theo từng hãng (đặc biệt hãng nhỏ như GHSH); số lỗi hãng bị khiếu nại hoặc phải hoàn tác mỗi tuần."
   }
 }
