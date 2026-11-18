@@ -24,6 +24,35 @@ Ghi `members` trong `submission/submission.json` theo dạng `"HoVaTen-MSSV"`, k
 
 Mỗi thành viên tự viết một mục bên dưới (chép mẫu, đổi tiêu đề thành họ tên không dấu và MSSV, ví dụ `## NguyenVanAn-20241234`).
 
+## PhanBaAn-2A202603375
+
+### Phần việc phụ trách
+
+Trưởng nhóm, Kỹ sư cổng A (P1), theo phân công trong `TASKS.md`:
+
+- Tạo repo, mời thành viên và team chấm, chia việc (`TASKS.md`), điền bảng thành viên.
+- Câu 1.3 (Phiếu A, A2 cột Offline) và câu 1.5 (A3). Soát `config/acceptance_criteria.json`, ký và push (A5).
+- Máy chạy lệnh duy nhất của bàn: `eval`, `gate`, `checkpoint`, `grade`, `check_submission` (B0, B1, B8, C0, C7).
+- Câu 2.6 (B7.1): `write_gate` trong `lab10/guards.py`. Vòng 2: sửa cổng code cùng Dương.
+- Câu 2.5 (B6): hai lý do pre-mortem đánh dấu **(An)** (fail-open và ghi hoàn trùng khi LLM lỗi 429; ghi lỗi oan cho hãng).
+
+### Đóng góp cụ thể
+
+- Thiết kế offline metric cho bước ghi lỗi hãng (câu 1.3), dựa trên sự kiện `file_carrier_fault`, `tracking` và nhãn `label.faults`.
+- Phát hiện và sửa lỗi xuống dòng CRLF trên máy chạy lệnh (`core.autocrlf`), lỗi này làm cả 19 file bị khoá lệch hash so với `lab10/MANIFEST.json`.
+
+### Dùng AI
+
+Dùng Claude (Claude Code) để: đọc README và code, soạn nháp phân công (`TASKS.md`), câu 1.3, câu 1.5, bản nháp tiêu chí và câu tiêu chí A4, bản nháp pre-mortem B6. Mọi ngưỡng và quyết định do cả bàn đọc lại và chốt.
+
+### Bằng chứng
+
+Mã commit, mã lần chạy (`runs/<mã>`), dòng trong phiếu. *(điền dần trong buổi)*
+
+### Exit ticket
+
+*(điền cuối buổi)*
+
 ## NguyenThuyDuong-2A202603388
 
 ### Phần việc phụ trách
