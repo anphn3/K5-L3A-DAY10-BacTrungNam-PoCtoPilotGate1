@@ -79,6 +79,31 @@ def _facts(ctx, order_id):
     return order, policy, parcel, H.db_delay_days(parcel, ctx.as_of)
 
 
+def _fault_parcels(ctx, order, policy):
+    """Parcels of the order that the policy allows to blame on their carrier (late enough + recorded fault cause)."""
+    return [p for p in order["parcels"] if H.carrier_at_fault(policy, p, H.db_delay_days(p, ctx.as_of))]
+
+
+def _fault_target(ctx, order, policy):
+    """Which parcel a carrier strike may go to. Returns (parcel or None, reason).
+    Vòng 2 · thẻ S6: một đơn = nhiều kiện, mỗi kiện một hãng / tài xế. Ticket nêu kiện thì chỉ kiện đó;
+    ticket không nêu kiện thì chỉ khi đúng MỘT kiện đủ điều kiện quy lỗi. Hai kiện trở lên: không đoán."""
+    at_fault = _fault_parcels(ctx, order, policy)
+    pid = ctx.ticket.get("parcel_id")
+    if pid:
+        named = next((p for p in order["parcels"] if p["parcel_id"] == pid), None)
+        if named is None:
+            return None, f"ticket nêu kiện {pid} không có trong đơn"
+        return (named, "") if named in at_fault else (None, f"kiện {pid} khách nêu không đủ điều kiện quy lỗi hãng")
+    if len(at_fault) == 1:
+        return at_fault[0], ""
+    if not at_fault:
+        return None, "không kiện nào trễ đủ ngưỡng với nguyên nhân được ghi nhận thuộc lỗi hãng"
+    return None, (f"đơn có {len(at_fault)} kiện cùng đủ điều kiện quy lỗi ("
+                  + ", ".join(f"{p['parcel_id']}/{p['carrier_id']}" for p in at_fault)
+                  + ") mà ticket không nêu kiện nào")
+
+
 def _valid_approval(ctx, approval_id, order_id, amount):
     """An approval counts only if it is for THIS order, still valid, not expired, covers the amount,
     and is signed by the approver named in config (operations.approver_id)."""
@@ -105,6 +130,12 @@ def write_gate(ctx, action):
         if facts is None:
             return Verdict.escalate("không đủ dữ liệu đơn / tracking / chính sách hiệu lực để kiểm số tiền hoàn")
         order, policy, parcel, delay = facts
+        # Vòng 2 · S6: đơn nhiều kiện, nhiều kiện cùng có thể quy lỗi, khách không nói kiện nào -> không biết ai
+        # chịu lỗi và cũng không chắc khoản hoàn đúng kiện. Dừng TRƯỚC lệnh ghi đầu tiên (chưa ghi sổ cái).
+        if not ctx.ticket.get("parcel_id") and len(_fault_parcels(ctx, order, policy)) > 1:
+            _, why = _fault_target(ctx, order, policy)
+            ctx.log("ambiguous_fault_parcel", order_id=order["order_id"], reason=why)
+            return Verdict.escalate("không xác định được kiện nào có lỗi: " + why + ", chuyển người xác minh")
         owed = H.entitlement_vnd(policy, order, delay, parcel.get("delay_cause"))
         already = sum(r["amount_vnd"] for r in ctx.tools.ledger_rows(order_id=order["order_id"]))
         remaining = owed - already
@@ -130,13 +161,10 @@ def write_gate(ctx, action):
         facts = _facts(ctx, action.get("order_id"))
         if facts is None:
             return Verdict.deny("không đủ dữ liệu để quy lỗi cho hãng")
-        order, policy, parcel, _ = facts
-        at_fault = [p for p in order["parcels"]
-                    if H.carrier_at_fault(policy, p, H.db_delay_days(p, ctx.as_of))]
-        if not at_fault:
-            return Verdict.deny("không kiện nào trễ đủ ngưỡng với nguyên nhân được ghi nhận thuộc lỗi hãng")
-        target = next((p for p in at_fault if p["parcel_id"] == action.get("parcel_id")), None) \
-            or (parcel if parcel in at_fault else at_fault[0])
+        order, policy, _, _ = facts
+        target, why = _fault_target(ctx, order, policy)
+        if target is None:
+            return Verdict.deny(why)
         cap = ctx.tools.ops_limits().get("max_auto_strikes_per_carrier_per_day")
         if cap is not None and len(ctx.tools.fault_rows(carrier_id=target["carrier_id"])) >= cap:
             ctx.log("carrier_strike_cap", carrier_id=target["carrier_id"], cap=cap)
