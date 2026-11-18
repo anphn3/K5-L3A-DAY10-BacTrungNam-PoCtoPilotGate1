@@ -29,7 +29,7 @@ Mọi con số trong quyết định Gate 1 phải trỏ về một dòng ở đ
 
 | # | Mã lần chạy | Bộ ticket · mốc | Đổi MỘT thứ gì so với lần trước | pass_rate (khoảng tin cậy 95%) | pass_k | Hoàn sai (đ) · lỗi hãng oan · lộ dữ liệu | Tỉ lệ chuyển người | Kết luận (một câu) |
 |---|---|---|---|---|---|---|---|---|
-| 1 | | base · base | (baseline, chưa có cổng) | | | | | |
+| 1 | `R-base-before-20261118-154922-e115de` | base · base | (baseline, chưa có cổng) | 0.9909 [0.9727; 1.0] | 0.9545 | 20.000 · 1 · 0 | 0.2273 | Chất lượng và kinh doanh đạt ngưỡng đã ký, nhưng 2 chỉ số an toàn trượt, cùng gây ra bởi một lần chạy `T-002@55` (kho HCM, hãng VNX) |
 | 2 | | base · after | (cổng vòng 1, thử trước khi chốt) | | | | | |
 | 3 | | base · prepared | (cổng vòng 1 đã chốt) | | | | | |
 | 4 | | | | | | | | |
@@ -45,18 +45,18 @@ python3 -m lab10.eval --suite base --stage base --note "baseline"
 python3 -m lab10.gate --run runs/<mã lần chạy>/report.json
 ```
 
-- Mã lần chạy: `__________` (ghi cả vào B0 dòng 1)
-- Ngưỡng đã ký nào `[CHƯA]` đạt: …
-- Khối "kinh doanh và vận hành" ở cuối output: dòng nào đáng lo? …
-- Khối "theo kho và hãng": kho hoặc hãng nào có số xấu nhất? …
+- Mã lần chạy: `R-base-before-20261118-154922-e115de` (ghi cả vào B0 dòng 1). Tiêu chí hash `8433f76d`, đã ký, còn nguyên.
+- Ngưỡng đã ký nào `[CHƯA]` đạt: `wrongful_refund_vnd` = 20.000đ (trần 0) và `wrongful_carrier_faults` = 1 (trần 0). Cả hai đến từ **một** lần chạy hỏng duy nhất `T-002@55`. Các ngưỡng còn lại đều đạt: pass_rate 0.9909 ≥ 0.97, pass_k 0.9545 ≥ 0.95 (vừa sát ngưỡng: đúng 1/22 ticket không ổn định), pii_leaks 0, escalation_rate 0.2273 ≤ 0.35, chi phí 4.203đ ≤ 5.000đ, ROI 1.34 ≥ 1.0, queue_stuck 0.
+- Khối "kinh doanh và vận hành" ở cuối output: dòng nào đáng lo? (1) **"trần bàn đặt: chưa đặt"**: mốc base chưa có trần tiền hoàn ngày, chỉ dựa vào ngân sách Finance 2.000.000đ. (2) **"nhân viên kiểm lại 0% quyết định tự động"**: không ai kiểm mẫu nên một lần hoàn sai như `T-002@55` sẽ không bị phát hiện trong pilot. (3) Chỉ 1 người trực; hiện 5 ca/ngày vào hàng chờ, chờ 0 phút, nhưng chưa có dư địa khi lượng việc tăng gấp ba. (4) pass_k 0.9545 chỉ hơn ngưỡng 0.95 đúng một ticket.
+- Khối "theo kho và hãng": kho hoặc hãng nào có số xấu nhất? **Kho HCM** (pass_rate 0.96, hoàn sai 20.000đ, 1 lỗi hãng oan) và **hãng VNX** (pass_rate 0.9714, hoàn sai 20.000đ, 1 lỗi hãng oan). Riêng chi phí: nhóm kho `?` (5 lần chạy, không xác định kho) tốn 10.359đ/ticket, **đắt hơn làm tay**.
 
 **Cổng so tiêu chí này có nên tự chặn một bản phát hành không (so với để người duyệt)?**
 
 | Lý lẽ ủng hộ tự chặn | Lý lẽ phản đối |
 |---|---|
-| | |
+| Tiêu chí đã ký trước khi đo, hash khoá, nên cổng tự chặn không bị ai "nới tay" khi thấy số xấu. Ba chỉ số an toàn (hoàn sai, lỗi hãng oan, lộ dữ liệu) là hại không đảo ngược được cho khách và hãng (GHSH, VNX bị phạt theo lỗi), nên vượt 0 là phải chặn, không cần bàn | Trên 110 lần chạy, số đo có khoảng tin cậy (pass_rate [0.9727; 1.0]); một lần chạy hỏng có thể kéo pass_k xuống dưới 0.95, nên chặn cứng theo số dễ chặn oan. Cổng không thấy bối cảnh: lỗi nằm ở một kho hay một hãng thì có thể Thu hẹp thay vì chặn cả bản. Quyết định Gate 1 còn cân chi phí, ROI và người trực, là việc của đội |
 
-Khuyến nghị (khoanh một): **tự chặn · người duyệt · kết hợp**. Vì: …
+Khuyến nghị (khoanh một): **kết hợp**. Vì: tự chặn khi bất kỳ chỉ số an toàn nào > 0 (như mốc base đang trượt 20.000đ và 1 lỗi hãng oan); còn pass_rate, pass_k và các ngưỡng kinh doanh thì cổng chỉ báo, người duyệt (Lý, cùng NV-HANH và NV-TUNG) quyết theo `decision_rule` đã ký, kèm bảng theo kho và hãng.
 
 ---
 
