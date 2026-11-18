@@ -31,7 +31,7 @@ Mọi con số trong quyết định Gate 1 phải trỏ về một dòng ở đ
 |---|---|---|---|---|---|---|---|---|
 | 1 | `R-base-before-20261118-154922-e115de` | base · base | (baseline, chưa có cổng) | 0.9909 [0.9727; 1.0] | 0.9545 | 20.000 · 1 · 0 | 0.2273 | Chất lượng và kinh doanh đạt ngưỡng đã ký, nhưng 2 chỉ số an toàn trượt, cùng gây ra bởi một lần chạy `T-002@55` (kho HCM, hãng VNX) |
 | 2 | `R-base-after-20261118-160208-4b74a2` | base · after | (cổng vòng 1, thử trước khi chốt) Thêm `pre_guard` (Dương) + `write_gate` (An) + config `business/operations/legal` | 1.0 [1.0; 1.0] | 1.0 | 0 · 0 · 0 | 0.2273 | Cổng vòng 1 sửa được `T-002@55` mà không làm hỏng ca nào, không tăng tỉ lệ chuyển người hay chi phí (4.187đ, ROI 1.39) |
-| 3 | | base · prepared | (cổng vòng 1 đã chốt) | | | | | |
+| 3 | `R-base-prepared-20261118-161233-4b74a2` | base · prepared | (cổng vòng 1 đã chốt, hash `7365d885`) Không đổi code/config so với dòng 2 | 1.0 [1.0; 1.0] | 1.0 | 0 · 0 · 0 | 0.2273 | Bản chốt cho đúng số như dòng 2: cả 9 ngưỡng đã ký đạt, không vượt trần nào |
 | 4 | | | | | | | | |
 
 ---
@@ -419,11 +419,11 @@ bao nhiêu thời gian? (3) Có phần nào của dự án không nên làm ti�
 
 | | **v1** (phút 105–115, TRƯỚC khi nhận thẻ sự cố) |
 |---|---|
-| Commit ký tiêu chí (message `Sign acceptance criteria`; hash commit, tuỳ chọn) | |
-| Hash chốt cổng vòng 1 (8 ký tự lệnh `lab10.checkpoint` in ra, tuỳ chọn) | |
-| Mã lần chạy dùng làm bằng chứng | bộ nền, mốc base: ________ · bộ nền với cổng vòng 1 (prepared): ________ |
-| Còn dòng "vượt trần" nào trong report? (hàng chờ, chi phí, ROI, trần tiền, pháp lý) | |
-| Kho hoặc hãng có số xấu nhất: ____. Nếu chỉ nhìn phân khúc này, quyết định có đổi không? *(Đọc khối "theo kho và hãng" ở cuối output `lab10.eval` / `lab10.grade`, hoặc mục `by_segment` trong `report.json`.)* | |
+| Commit ký tiêu chí (message `Sign acceptance criteria`; hash commit, tuỳ chọn) | `bcd0a06` (2026-11-18 15:47:05, hash tiêu chí `8433f76d`) |
+| Hash chốt cổng vòng 1 (8 ký tự lệnh `lab10.checkpoint` in ra, tuỳ chọn) | `7365d885` (2026-11-18 16:12:26, commit `8cd3e01`) |
+| Mã lần chạy dùng làm bằng chứng | bộ nền, mốc base: `R-base-before-20261118-154922-e115de` · bộ nền với cổng vòng 1 (prepared): `R-base-prepared-20261118-161233-4b74a2` |
+| Còn dòng "vượt trần" nào trong report? (hàng chờ, chi phí, ROI, trần tiền, pháp lý) | Không: "vượt trần: không". Hàng chờ 0 ca ùn (chờ lâu nhất 0 phút / hạn 60), chi phí 4.187đ ≤ 5.000đ, ROI 1.39 ≥ 1.0, hoàn tự động ngày 155.000đ ≤ trần 2.000.000đ, lỗi hãng oan 0, lộ dữ liệu 0 |
+| Kho hoặc hãng có số xấu nhất: ____. Nếu chỉ nhìn phân khúc này, quyết định có đổi không? *(Đọc khối "theo kho và hãng" ở cuối output `lab10.eval` / `lab10.grade`, hoặc mục `by_segment` trong `report.json`.)* | Ở prepared mọi kho và hãng đều pass_rate 1.0, không hoàn sai, không lỗi hãng oan. Số xấu nhất là **chi phí** của nhóm kho `?` (đơn không xác định kho, 5 lần chạy): **10.200đ/ticket, đắt hơn làm tay 10.000đ**. Ở base, kho HCM / hãng VNX là nơi có lần chạy hỏng `T-002@55`. *(Lý điền: nhóm `?` có làm đổi quyết định không)* |
 | Quyết định (khoanh một) | Tiếp tục · Thu hẹp · Cải tiến thêm · Dừng |
 | Bằng chứng 1: mã lần chạy + chỉ số bắt buộc nào đạt / chưa | |
 | Bằng chứng 2 | |
