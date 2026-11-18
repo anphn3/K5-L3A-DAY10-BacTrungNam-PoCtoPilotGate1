@@ -16,7 +16,7 @@ Họ tên đầy đủ và MSSV của **mọi** thành viên; thêm dòng nếu 
 |   1 | Phan Bá An | 2A202603375 | Kỹ sư cổng | ✓ |
 |   2 | Nguyễn Thùy Dương |      | Kỹ sư cổng |             |
 |   3 | Trần Thị Lý |      | Sản phẩm và kinh doanh |             |
-|   4 | Lý Hoàng Nam |      | Vận hành và pháp lý |             |
+|   4 | Phí Hoàng Nam | 2A202603435     | Vận hành và pháp lý |             |
 
 Ghi `members` trong `submission/submission.json` theo dạng `"HoVaTen-MSSV"`, khớp bảng trên.
 
