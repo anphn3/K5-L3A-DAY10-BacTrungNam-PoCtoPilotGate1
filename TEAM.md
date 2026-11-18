@@ -70,3 +70,40 @@ Kỹ sư cổng B (P2), theo phân công trong `TASKS.md`:
 
 ### Exit ticket
 
+## TranThiLy-2A202603404
+
+### Phần việc phụ trách
+
+Sản phẩm và kinh doanh (P3), theo phân công trong `TASKS.md`:
+
+- Câu 1.1–1.2 (Phiếu A, A1): mục tiêu cấp hệ thống, mục tiêu nhìn từ chị Oanh (kế toán) và chị Hạnh (trưởng ca).
+- Câu 1.6 (Phiếu A, A4) và `config/acceptance_criteria.json`: người đứng tên `signed_by`; soát và thống nhất bộ ngưỡng với bàn trước khi P1 ký.
+- Câu 2.3 (Phiếu B, B3): bản đồ dữ liệu và ví dụ drift.
+- Câu 2.5 (Phiếu B, B6): một lý do pre-mortem đánh dấu **(Lý)**.
+- Câu 2.9 (Phiếu B, B7.4): mục `business` của `config/operating_gates.json`.
+- B5 checklist: PIC các dòng 2 (Dữ liệu), 6 (Chi phí), 9 (Quyết định).
+- B8 quyết định v1 và C12 quyết định v2; demo phần con số và quyết định.
+
+### Đóng góp cụ thể
+
+- Viết mục tiêu cấp hệ thống (câu 1.1): xử lý đúng chính sách hiệu lực, tiền khớp sổ cái, không ghi lỗi oan cho hãng, không lộ dữ liệu, ca không chắc thì chuyển người trong SLA 60 phút.
+- Soạn một bộ ngưỡng và `decision_rule`; khi trùng với bản nháp của bàn (`8dc52ac`) thì so sánh hai bản, chọn bản của bàn (`decision_rule` cụ thể hơn) và đối chiếu từng ngưỡng với `data/world.json` để giải thích được khi demo (pass_k 0,95 nghĩa là tối đa 1/22 ticket chập chờn; ROI 1,0 phải bù phí giữ chỗ người trực 30.000đ/ca).
+- Bản đồ dữ liệu (B3): xác định tracking (`delivered_date`, `delay_cause`) là nguồn sự thật, số ngày khách khai là bản sao không tin được; ví dụ drift là **quan hệ vào–ra đổi**: REFUND-v3 → REFUND-v4 ngày 2026-12-01 (hạn mức 200.000đ → 100.000đ, trễ do bão không còn là lỗi hãng).
+- Cổng kinh doanh (B7.4): `daily_refund_cap_vnd` 2.000.000đ (ngân sách Finance), `cost_budget_per_ticket_vnd` 1.500đ (trần LLM), `pilot_scope` all 100%, `roi_min` 1,0; đối chiếu với số base (chi phí 4.203đ/ticket, ROI 1,34; nhóm ticket không xác định kho 10.359đ/ticket, đắt hơn làm tay).
+- Pre-mortem (B6): thêm lý do drift chính sách v4 (lăng kính Kinh doanh), đưa vào Risk register và đặt ngày quyết định lại trước 2026-11-30.
+- Nhận ra chỉ số an toàn ở base trượt nhưng **chưa áp được "Dừng"** vì `decision_rule` ghi "sau khi đã sửa"; quyết định v1 phải dựa trên mốc prepared.
+
+### Dùng AI
+
+Dùng Claude để: đọc đề và `data/world.json`, lập checklist việc của P3, soạn nháp câu 1.1–1.2, bản đồ dữ liệu B3, lý do cho các con số B7.4, lý do pre-mortem B6, nháp B8; hướng dẫn xử lý conflict Git. Em tự đối chiếu mọi con số với `data/world.json` và report của P1 (mã lần chạy base), và chỉ đưa vào phiếu những gì em giải thích được. Ngưỡng tiêu chí do cả bàn chốt.
+
+### Bằng chứng
+
+- Commit: `f5f5251` (B3 bản đồ dữ liệu + drift), `27a39dd` (B7.4 + `operating_gates.json` mục `business`), `55c676e` (A1 câu 1.1, MSSV), `fab6f76` (B7.4 đối chiếu số base), commit B6 thêm lý do drift v4.
+- Tiêu chí ký: commit `bcd0a06` (`Sign acceptance criteria`), hash tiêu chí `8433f76d`, `signed_by` Trần Thị Lý.
+- Lần chạy dùng để đối chiếu: `R-base-before-20261118-154922-e115de`.
+- Phiếu: A mục A1; B mục B3, B5 (dòng 2, 6, 9), B6 (dòng **(Lý)**), B7.4, B8; C mục C5, C12 *(điền tiếp ở vòng 2)*.
+
+### Exit ticket
+
+*(điền cuối buổi)*
