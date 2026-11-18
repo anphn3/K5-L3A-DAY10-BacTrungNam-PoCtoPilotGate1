@@ -159,6 +159,8 @@ Dùng Claude (Claude Code) để: đọc README, đề bài và code (`lab10/age
 - Commit `5639919`: Phiếu A câu 1.2, câu 1.4; thông tin P4 trong bảng thành viên.
 - Commit `2882ecb`: khôi phục cột Telemetry câu 1.4 (bản của Dương) bị mất khi merge.
 - Commit `a066507`: A4 bước 2, B4, B5, `config/operating_gates.json` mục `operations` và `legal`, Runbook B7.5–B7.6.
+- Commit `c8ce989`: soát Runbook B7.5–B7.6 theo config và số base, cập nhật checklist B5 theo base, lý do **(Nam)** ở B6, mục cá nhân trong `TEAM.md`.
+- Commit `c943015`: Phiếu C mục C4 (HAZOP thẻ S6), C10 (risk register), C11 (cập nhật checklist, Runbook phần 4–5); điền `submission/submission.json` (trừ quyết định v2 và ba dòng bắt buộc).
 - Lần chạy đối chiếu: `R-base-before-20261118-154922-e115de` (số base dùng trong B5, Runbook 2, B7.6).
 - Phiếu: `templates/form-a-criteria.md` (A1 câu 1.2, A4 bước 2); `templates/form-b-evaluation-gates.md` (B4, B5, dòng **(Nam)** ở B6, B7.5, B7.6).
 
