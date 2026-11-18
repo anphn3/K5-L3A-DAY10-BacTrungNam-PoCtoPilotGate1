@@ -261,8 +261,17 @@ Bốn lăng kính (bắt buộc đủ cả bốn; dự án AI hay chết ở ba 
 | Nhân viên CSKH không tin trợ lý nên vẫn kiểm lại tay 100% quyết định, pilot không tiết kiệm được gì | Con người và vận hành | Có: `staff_behavior.recheck_auto_decisions_pct` = 0 và `trust_conditions` (cần ghi chú giải thích, kiểm mẫu ≥ 10%, người duyệt NV-HANH) | Config: `operations.approver_id = NV-HANH`, `review_sampling_pct`, `decision_note` (vòng 2); Risk register |
 | **(An)** Trợ lý ghi lỗi cho GHSH (12 tài xế, phạt 150.000đ/lỗi, đình chỉ sau 3 lỗi/7 ngày) khi kiện không có nguyên nhân trễ, hoặc ghi vào kiện đầu tiên trong khi kiện trễ là kiện khác; hãng bị đình chỉ oan | Pháp lý | Có: `lab10/agent.py` ("unknown cause → blame carrier", `first = parcels[0]`); trace sự kiện `tracking` (`cause_recorded: false`) | **★ CỔNG 3 (config + code):** `legal.carrier_fault_requires_recorded_cause = true`; `write_gate` chặn `file_carrier_fault` khi kiện được ghi không phải kiện trễ hoặc hãng đã chạm `max_auto_strikes_per_carrier_per_day` = 2 |
 | Tin báo cho hãng (`notify_carrier`) chép nguyên văn lời khách (`customer_note`) và, với đơn quà tặng, gửi cả tên + số điện thoại người nhận cho bên thứ ba | Pháp lý | Có: payload trong `lab10/agent.py`, so với `policies[].carrier_notice_fields` (chỉ `order_id`, `parcel_id`, `district`, `delay_days`) | Gộp vào CỔNG 3: `legal.pii_fields_blocked_to_third_party` gồm `customer_note`, `recipient_contact`; `write_gate` có thể `modify` payload chỉ giữ trường được phép |
+| **Dương:** Pilot đã phải dừng vì agent tin độ trễ khách tự khai hơn tracking, dẫn đến hoàn sai tiền và ghi lỗi oan cho hãng; kế toán phải xử lý chênh lệch, hãng mất niềm tin vào đối soát. Đây là kịch bản pre-mortem, chưa phải sự cố pilot thật. | Kỹ thuật | `T-002@55`, mốc base: bước 02 DB ghi 2 ngày; bước 03 đổi thành 5 ngày; bước 06 hoàn 20.000đ; bước 07 ghi lỗi VNX. Nhãn yêu cầu hoàn 0đ, không ghi lỗi hãng. | Đề xuất cổng đối chiếu tracking và chính sách hiệu lực trước `issue_refund` và `file_carrier_fault`; không dùng số khách khai ghi đè độ trễ nghiệp vụ. Thiếu căn cứ thì chuyển người trước khi ghi tiền. Chờ cả nhóm chốt. |
 
 **2–3 lý do chọn thành cổng hôm nay (★):** CỔNG 1 (hoàn vượt mức không có phê duyệt thật), CỔNG 2 (trần tiền hoàn ngày + không fail-open), CỔNG 3 (không ghi lỗi hãng thiếu căn cứ + không lộ dữ liệu cá nhân cho hãng). Các lý do còn lại chuyển vào Risk register (Phiếu C mục C10).
+
+**Ba cổng Dương đề xuất để cả bàn thảo luận (chưa chốt, chưa triển khai):**
+
+1. **Đúng căn cứ nghiệp vụ:** trong `write_gate`, đối chiếu tracking của đúng kiện và chính sách hiệu lực trước ghi tiền/ghi lỗi hãng; không lấy lời khách thay dữ liệu nghiệp vụ. Khi thiếu căn cứ cần chuyển người trước thao tác ghi tiền, vì tiền được ghi trước lỗi hãng.
+2. **Giới hạn thiệt hại tài chính:** kiểm tra tổng hoàn tự động trong ngày với `business.daily_refund_cap_vnd` trước `issue_refund`, đồng thời kiểm tra phê duyệt theo chính sách. Khi vượt trần hoặc thiếu phê duyệt hợp lệ thì chuyển người; mức trần do cả nhóm chọn từ `ops_limits` và `ops_facts`, không tự đặt số trong đề xuất này.
+3. **Bảo vệ dữ liệu cá nhân:** trước `notify_carrier`, chỉ gửi trường cần thiết cho đối soát, loại các trường bị cấm theo `legal.pii_fields_blocked_to_third_party`; không chuyển nguyên văn ghi chú khách chứa thông tin cá nhân cho hãng. Cần kiểm tra cả nội dung văn bản tự do, không chỉ tên trường.
+
+Các thành viên khác bổ sung lý do của mình và phủ đủ bốn lăng kính; cả bàn xác nhận ba cổng cuối cùng, người phụ trách và cách kiểm chứng trước khi triển khai.
 
 ---
 
@@ -291,8 +300,8 @@ python3 -m unittest discover -s tests
 Bàn đang chỉnh cổng tới khi 22 ticket bộ nền xanh hết. Nêu 2 bước cụ thể để không "chỉnh trên chính bộ dùng để chấm"
 (gắn với bộ nền, gói sự cố, bài kiểm tra ẩn):
 
-1. …
-2. …
+1. **Tách bộ phát triển và bộ kiểm tra khả năng khái quát.** Dùng 22 ticket bộ nền để tìm lỗi và kiểm tra hồi quy; không coi kết quả xanh trên bộ đã dùng chỉnh cổng là bằng chứng độc lập. Chốt bản vòng 1 bằng `lab10.checkpoint` trước khi nhận gói sự cố; khi nhận đúng thẻ đã bốc, nhờ P1 chạy `lab10.grade --incident Sx` trên bản prepared trước mọi sửa đổi, lưu mã lần chạy. Sau khi dùng gói sự cố để sửa, gọi đó là bộ phát triển vòng 2; giữ bài kiểm tra ẩn cho team chấm đánh giá độc lập, không tìm cách xem hoặc suy đoán đáp án ẩn để vá riêng.
+2. **Viết cổng theo quy tắc nghiệp vụ, không học thuộc ticket hay nhãn.** Trong `pre_guard`/`write_gate`, chỉ dùng dữ liệu được phép lúc vận hành như tracking, chính sách hiệu lực, phê duyệt và sổ cái; không đọc `label`, mã seed hay nhánh riêng theo mã ticket/câu chữ của bộ thử. Trước khi kiểm, viết tính chất ở B7.3 rồi tạo hai ticket mới khác cách diễn đạt để thử bằng `--adhoc`; nhờ bạn khác trong nhóm đưa thêm biến thể. Ghi cả ca đạt và ca hỏng, chạy lại bộ nền sau mỗi sửa để phát hiện hồi quy; không dùng kết quả trên những ticket đã xem để tuyên bố đã vượt qua test ẩn.
 
 ### B7.3 · Câu 2.8 · Một behavioral test
 
