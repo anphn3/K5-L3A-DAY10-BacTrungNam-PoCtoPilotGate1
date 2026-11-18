@@ -34,12 +34,22 @@ trong VS Code, bấm `Ctrl+Shift+V` để xem dạng bảng. Mở sẵn thêm 1 
 - "Đổi lại: chuyển người trên thẻ **0 → 0.17**, chi phí **3.167đ → 4.817đ/ticket**, nhưng ROI **0.74 → 1.08**, vẫn ≥ ngưỡng
   đã ký 1.0, vì hết 270.000đ hoàn sai."
 - "Report: không còn vượt trần, mọi ngưỡng đã ký đạt, 'được phép cân nhắc Tiếp tục'."
-- "Quyết định v2: **______** (Lý điền theo C12), khớp dòng `decision_rule` **______**. So với v1 (Thu hẹp): **đổi / giữ** vì ______."
+- "Quyết định v2: **Thu hẹp**, giữ như v1. Report cho phép cân nhắc Tiếp tục, nhưng luật đã ký của bàn xét cả phân khúc:
+  **kho HCM 5.617đ/ticket > 5.000đ đã ký**, toàn bộ phần vượt đến từ loại ticket 'không xác định được kiện chịu lỗi'."
+- "Cắt gì: **không cắt kho**, giữ 4 kho, 100%, 1 người trực. Cắt **loại ticket** mà dữ liệu không đủ biết ai chịu lỗi: không tự
+  hoàn, không tự ghi lỗi, đi thẳng NV-HANH. Khớp dòng `decision_rule` **'Thu hẹp'** đã ký."
+- "v1 không Tiếp tục vì gói sự cố chưa đo; v2 lý do đó hết, nhưng lý do chi phí phân khúc vẫn còn, nên giữ Thu hẹp."
 
 ### 4:00–5:00 · Nam · Người, vận hành, pháp lý
 - "Người: NV-HANH duyệt ca mơ hồ (6 ca/giờ; trên thẻ ~2/12 ticket); NV-TUNG giữ công tắc: **≥ 1 lỗi ghi cho kiện đúng hẹn** →
   tắt `file_carrier_fault` trong ca."
-- "Ba dòng bắt buộc: giả định môi trường ______ · giảm hay ngăn ______ · đo lại trong pilot ______" (chép từ C12).
+- Ba dòng bắt buộc (nói gọn, bản đầy đủ ở C12):
+  1. Giả định: tracking từng kiện (hãng, ngày giao, nguyên nhân trễ) được nhập đúng và kịp thời; ngoài thực tế hãng nhỏ hay
+     quét sót, nhập bù tay, và khách hiếm khi nói rõ kiện nào.
+  2. **Chỉ GIẢM**: cổng hết tự đoán kiện, nhưng vẫn tin tracking; tracking sai thì vẫn có thể ghi oan, phần còn lại dựa vào
+     NV-HANH và đối soát tuần của NV-OANH.
+  3. Đo lại trong pilot: tỉ lệ đơn tách kiện và ticket không nêu kiện (quyết định ROI, đang sát 1.08), độ chính xác tracking
+     theo hãng (nhất là GHSH), số lỗi hãng bị khiếu nại mỗi tuần.
 
 ---
 
