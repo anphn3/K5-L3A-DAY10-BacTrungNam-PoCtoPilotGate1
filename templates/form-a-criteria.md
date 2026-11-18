@@ -112,10 +112,10 @@ Giải thích một câu: Y chỉ hơn X đúng 1/50 lần chạy, và 1,0 (số
 
 | Câu hỏi soát | Ghi chú của bàn |
 |---|---|
-| Chỉ số này có ý nghĩa với **mọi** bên liên quan không (khách, hãng vận chuyển, shop, người duyệt, kế toán)? | |
-| Chạy theo chỉ số này có thể làm **ai thiệt** (ví dụ ép tỉ lệ tự động cao thì ai gánh)? | |
-| Đây có phải nghĩa của "thành công" ở **ngày 1** của pilot không? | |
-| Còn ở **ngày thứ 1.000** (12 depot, chính sách đã đổi vài lần)? Ngưỡng nào sẽ phải viết lại? | |
+| Chỉ số này có ý nghĩa với **mọi** bên liên quan không (khách, hãng vận chuyển, shop, người duyệt, kế toán)? | `pass_rate`, `pass_k` chủ yếu có ý nghĩa với khách và LogiX. Ba chỉ số an toàn mới bảo vệ bên ngoài: `wrongful_carrier_faults_max` = 0 bảo vệ hãng (GHSH, DNB bị đình chỉ sau 3 lỗi/7 ngày); `pii_leaks_max` = 0 bảo vệ người nhận, nhất là người nhận quà; `wrongful_refund_vnd_max` = 0 giúp chị Oanh khớp sổ. `queue_stuck_max` = 0 bảo vệ chị Hạnh và khách đang chờ. **Còn thiếu:** shop không có chỉ số riêng (ghi sai `payer` thì shop bị trừ tiền oan), nên phải theo dõi qua đối soát tuần của NV-OANH |
+| Chạy theo chỉ số này có thể làm **ai thiệt** (ví dụ ép tỉ lệ tự động cao thì ai gánh)? | Ép `escalation_rate` thấp (dưới 0,35) thì trợ lý tự quyết nhiều hơn, dễ hoàn sai hoặc ghi lỗi oan: hãng và kế toán gánh. Để `escalation_rate` cao thì 1 người trực (6 ca/giờ) bị ngập, ca bị ùn quá 60 phút: chị Hạnh và khách gánh. Ép `cost_per_ticket_vnd_max` (5.000đ) và `roi_min` (1,0) thì dễ muốn bỏ người trực hoặc tắt ghi chú giải thích: nhân viên phải tự kiểm lại tay, chi phí ẩn quay lại |
+| Đây có phải nghĩa của "thành công" ở **ngày 1** của pilot không? | Phần lớn có. Ngày 1 quan trọng nhất là ba chỉ số an toàn bằng 0 và không ca nào bị ùn. `pass_rate` 0,97 và `pass_k` 0,95 đo trên 22 ticket × 5 seed, là ngưỡng của PoC chứ chưa phải của khách thật. ROI ngày 1 có thể thấp vì phí giữ chỗ người trực (30.000đ/ca) là cố định, nên ngày 1 không dùng ROI để quyết Dừng |
+| Còn ở **ngày thứ 1.000** (12 depot, chính sách đã đổi vài lần)? Ngưỡng nào sẽ phải viết lại? | Từ 2026-12-01, REFUND-v4 có hiệu lực: hạn mức tự động giảm từ 200.000đ xuống 100.000đ, và bất khả kháng (`FORCE_MAJEURE`) không còn là lỗi hãng. Vì vậy câu ranh giới đầu ra "200.000đ" phải viết lại theo "hạn mức của chính sách đang hiệu lực". Với 12 depot, lượng ca chuyển người tăng nhiều lần, nên `queue_stuck_max`, số người trực và trần hoàn tự động ngày (2.000.000đ) phải tính lại theo giờ cao điểm. Bộ thử 22 ticket không còn đại diện: mỗi lần đổi chính sách phải soạn lại bộ thử |
 
 #### Bước 3 · Chốt và hẹn ngày xem lại
 
