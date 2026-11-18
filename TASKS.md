@@ -9,7 +9,7 @@ Repo: `K5-L3A-DAY10-BacTrungNam-PoCtoPilotGate1` · Đọc kỹ `README.md` mụ
 | P1 | Phan Bá An (trưởng nhóm) | Kỹ sư cổng A | **Máy chạy lệnh duy nhất**, `write_gate` trong `lab10/guards.py`, gom bài |
 | P2 | Nguyễn Thùy Dương | Kỹ sư cổng B | `pre_guard` trong `lab10/guards.py`, `lab10/monitors.py`, trace, ticket hiểm |
 | P3 | Trần Thị Lý | Sản phẩm và kinh doanh | `config/acceptance_criteria.json`, mục `business` của `config/operating_gates.json`, quyết định v1/v2 |
-| P4 | Lý Hoàng Nam | Vận hành và pháp lý | Mục `operations` + `legal` của `config/operating_gates.json`, HAZOP, checklist, runbook, `submission/submission.json` |
+| P4 | Phí Hoàng Nam | Vận hành và pháp lý | Mục `operations` + `legal` của `config/operating_gates.json`, HAZOP, checklist, runbook, `submission/submission.json` |
 
 ## 2. Năm luật cả nhóm phải nhớ
 
