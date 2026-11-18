@@ -1,6 +1,6 @@
 # Phiếu A · Tiêu chí và cách đo · Khối 1 (phút 15–65)
 
-**Bàn:** ______ · **Người cầm bút chính:** vai Sản phẩm và kinh doanh (câu 1.3: Kỹ sư cổng; câu 1.2, 1.4: Vận hành và pháp lý)
+**Bàn:** K5-L3A-DAY10-BacTrungNam-PoCtoPilotGate1 · **Người cầm bút chính:** vai Sản phẩm và kinh doanh (câu 1.3: Kỹ sư cổng; câu 1.2, 1.4: Vận hành và pháp lý)
 
 Điền phiếu này **trước khi chạy trợ lý lần nào**. Viết xong thì chép ngưỡng sang `config/acceptance_criteria.json`, ký ở phút 60–65,
 rồi mới chạy đánh giá. Khối 1 không sửa code.
@@ -48,12 +48,12 @@ trợ lý có đang gây thiệt hại cho bên ngoài LogiX không; không có 
 
 | | Offline, cho MỘT bước (câu 1.3) | Telemetry production (câu 1.4) |
 |---|---|---|
-| **Bước / hành vi được đo** | | |
-| **Thước đo** (một câu, có đơn vị) | | |
-| **Dữ liệu** (lấy ở đâu, bao nhiêu, ai gán nhãn) | | |
-| **Cách tính** (công thức, mẫu số, cách xử lý ca thiếu dữ liệu) | | |
+| **Bước / hành vi được đo** | Bước **ghi lỗi hãng** (`file_carrier_fault`): agent quyết định hãng nào, kiện nào chịu lỗi giao trễ | |
+| **Thước đo** (một câu, có đơn vị) | Tỉ lệ lệnh ghi lỗi hãng **sai** (%) trên tổng số lệnh ghi lỗi hãng. "Sai" là cặp (hãng, kiện) không có trong nhãn đúng của ticket, kể cả trường hợp nguyên nhân trễ không được ghi trong tracking | |
+| **Dữ liệu** (lấy ở đâu, bao nhiêu, ai gán nhãn) | Sự kiện `tool` có `tool = file_carrier_fault` (lấy `carrier_id`, `parcel_id`) và sự kiện `tracking` (lấy `cause`, `cause_recorded`) trong `runs/<mã lần chạy>/traces/`, trên 22 ticket × 5 seed của bộ nền. Nhãn đúng là trường `label.faults` trong `data/tickets.jsonl`, do đội đối soát (vai kế toán) gán khi soạn bộ thử | |
+| **Cách tính** (công thức, mẫu số, cách xử lý ca thiếu dữ liệu) | Tử số: số lệnh `file_carrier_fault` có (hãng, kiện) không nằm trong `label.faults`. Mẫu số: tổng số lệnh `file_carrier_fault` đã ghi qua cổng. Đếm thêm hai số riêng: (1) lệnh bị cổng chặn hoặc công tắc tắt (sự kiện `gate`, `legal_gate`, `switch`), không tính vào mẫu số; (2) ticket mà `label.faults` khác rỗng nhưng agent không ghi lỗi (bỏ sót). Nếu không lần chạy nào ghi lỗi hãng thì báo "không có mẫu", không báo 0% | |
 | **Khung thời gian / ngưỡng báo động** | (không áp dụng) | |
-| **Điểm mù** (thước đo này KHÔNG thấy gì) | | |
+| **Điểm mù** (thước đo này KHÔNG thấy gì) | Không thấy trường hợp nhãn `label.faults` sai, hoặc `delay_cause` trong tracking DB sai từ nguồn. Không thấy hậu quả phía sau: hãng có bị trừ tiền oan không, `notify_carrier` có gửi dữ liệu cá nhân không | |
 
 **Ví dụ mẫu (bước "chọn độ trễ" của agent, đừng chép):**
 Thước đo: tỉ lệ lần chạy mà độ trễ agent dùng để tính tiền khác độ trễ theo tracking DB. Dữ liệu: sự kiện `proposal.delay_days_used`
@@ -71,9 +71,9 @@ nhau chia cho số lần chạy có sự kiện `proposal`; lần chạy không 
 
 ### Câu 1.5 · Chọn MỘT kết luận và giải thích một câu
 
-Số minh hoạ trong đề (không phải số của bàn). Khoanh: **(a) · (b) · (c) · (d)**
+Số minh hoạ trong đề (không phải số của bàn). Khoanh: **(b)**
 
-Giải thích một câu: …
+Giải thích một câu: Y chỉ hơn X đúng 1/50 lần chạy, và 1,0 (số của Y) vẫn nằm trong khoảng tin cậy 95% [0,9400; 1,0] của X, nên chưa đủ căn cứ nói Y tốt hơn. Cũng không thể kết luận hai bản chắc chắn như nhau (loại c), và X không cần chạy thêm seed mới "đạt" (loại d).
 
 ---
 
