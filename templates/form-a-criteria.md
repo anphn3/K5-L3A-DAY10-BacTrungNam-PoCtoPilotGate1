@@ -20,7 +20,7 @@ rồi mới chạy đánh giá. Khối 1 không sửa code.
 
 ### Câu 1.1 · Một mục tiêu cấp hệ thống (khác "model trả lời đúng")
 
-> …
+> Mỗi yêu cầu hoàn tiền do giao trễ được xử lý **đúng chính sách đang hiệu lực, với số tiền khớp sổ cái**, không ghi lỗi oan cho hãng vận chuyển và không lộ dữ liệu khách; ca nào trợ lý không đủ chắc chắn hoặc vượt hạn mức thì **chuyển cho người duyệt và được nhận xử lý trong 60 phút** (SLA trong `ops_limits.review_sla_minutes`), thay vì tự quyết.
 
 ### Câu 1.2 · Mục tiêu nhìn từ hai người
 
