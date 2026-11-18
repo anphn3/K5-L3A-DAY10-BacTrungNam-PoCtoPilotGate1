@@ -76,7 +76,7 @@ Kỹ sư cổng B (P2), theo phân công trong `TASKS.md`:
 
 Sản phẩm và kinh doanh (P3), theo phân công trong `TASKS.md`:
 
-- Câu 1.1–1.2 (Phiếu A, A1): mục tiêu cấp hệ thống, mục tiêu nhìn từ chị Oanh (kế toán) và chị Hạnh (trưởng ca).
+- Câu 1.1 (Phiếu A, A1): mục tiêu cấp hệ thống (câu 1.2 do Nam viết).
 - Câu 1.6 (Phiếu A, A4) và `config/acceptance_criteria.json`: người đứng tên `signed_by`; soát và thống nhất bộ ngưỡng với bàn trước khi P1 ký.
 - Câu 2.3 (Phiếu B, B3): bản đồ dữ liệu và ví dụ drift.
 - Câu 2.5 (Phiếu B, B6): một lý do pre-mortem đánh dấu **(Lý)**.
@@ -95,7 +95,7 @@ Sản phẩm và kinh doanh (P3), theo phân công trong `TASKS.md`:
 
 ### Dùng AI
 
-Dùng Claude để: đọc đề và `data/world.json`, lập checklist việc của P3, soạn nháp câu 1.1–1.2, bản đồ dữ liệu B3, lý do cho các con số B7.4, lý do pre-mortem B6, nháp B8; hướng dẫn xử lý conflict Git. Em tự đối chiếu mọi con số với `data/world.json` và report của P1 (mã lần chạy base), và chỉ đưa vào phiếu những gì em giải thích được. Ngưỡng tiêu chí do cả bàn chốt.
+Dùng Claude để: đọc đề và `data/world.json`, lập checklist việc của P3, soạn nháp câu 1.1, bản đồ dữ liệu B3, lý do cho các con số B7.4, lý do pre-mortem B6, nháp B8; hướng dẫn xử lý conflict Git. Em tự đối chiếu mọi con số với `data/world.json` và report của P1 (mã lần chạy base), và chỉ đưa vào phiếu những gì em giải thích được. Ngưỡng tiêu chí do cả bàn chốt.
 
 ### Bằng chứng
 
@@ -107,3 +107,40 @@ Dùng Claude để: đọc đề và `data/world.json`, lập checklist việc c
 ### Exit ticket
 
 *(điền cuối buổi)*
+
+## PhiHoangNam-2A202603435
+
+### Phần việc phụ trách
+
+Vận hành và pháp lý (P4), theo phân công trong `TASKS.md`:
+
+- Phiếu A: câu 1.2 (A1, mục tiêu nhìn từ chị Oanh và chị Hạnh); câu 1.4 (A2, cột Telemetry production, bàn chốt dùng bản của Dương); A4 bước 2 (soát bốn câu hỏi), soát chéo ngưỡng với Lý trước khi ký.
+- Phiếu B: câu 2.4 (B4 HAZOP vòng 1 trên `notify_carrier`, B5 checklist 9 nhóm); một lý do pre-mortem **(Nam)** ở B6; câu 2.10 (B7.5 Runbook phần 1–3, B7.6 Giờ cao điểm).
+- `config/operating_gates.json`: mục `operations` (`pic`, `approver_id`, `reviewers_on_shift`, `review_capacity_per_hour`, `max_queue_wait_minutes`, `stop_conditions`, `alert_channel`) và mục `legal`.
+- Vòng 2: bốc thẻ, C4 (HAZOP của thẻ), C10 (risk register), C11 (checklist, Runbook phần 4–5), điền `submission/submission.json`.
+- Demo: trả lời phần người trực, runbook, pháp lý.
+
+### Đóng góp cụ thể
+
+- Đặt mọi con số trong `operations` theo `ops_limits` và `ops_facts` đã thống nhất với Ops và Finance: PIC `NV-TUNG` (người giữ công tắc tắt trợ lý), người duyệt `NV-HANH` (khớp `staff_behavior.trust_conditions`), 1 người trực, 6 ca/giờ, chờ tối đa 60 phút (`review_sla_minutes`); bốn điều kiện dừng đều có ngưỡng 1, khớp ba chỉ số an toàn đã ký bằng 0.
+- Đọc `lab10/agent.py` và phát hiện thông báo gửi hãng chứa hai trường ngoài `carrier_notice_fields` của chính sách: `customer_note` (nguyên văn chữ khách) và `recipient_contact` (tên, SĐT người nhận quà). Cổng pháp lý lọc theo tên trường cấp ngoài cùng của payload, nên đặt `legal.pii_fields_blocked_to_third_party` = `["customer_note", "recipient_contact"]` thay vì `phone`, `name`. Bật `carrier_fault_requires_recorded_cause`.
+- HAZOP B4: tìm nhánh agent luôn lấy hãng của kiện đầu tiên (`parcels[0]`) nên có thể ghi lỗi nhầm hãng ở đơn nhiều kiện, và nhánh đơn quà tặng lộ SĐT người nhận (chưa thấy trên trace `T-002@55`).
+- Runbook 2 và Giờ cao điểm dùng số base `R-base-before-20261118-154922-e115de`: tính được nếu xếp cố định 2 người trực thì chi phí khoảng 5.567đ/ticket, vượt ngưỡng 5.000đ đã ký, nên chỉ gọi người thứ hai vào ngày cao điểm thật.
+- Soát A4 bước 2: chỉ ra câu ranh giới "200.000đ" phải viết lại khi REFUND-v4 có hiệu lực từ 2026-12-01 (hạn mức tự động còn 100.000đ), và shop chưa có chỉ số riêng khi ghi sai `payer`.
+
+### Dùng AI
+
+Dùng Claude (Claude Code) để: đọc README, đề bài và code (`lab10/agent.py`, `lab10/tools.py`, `lab10/ops.py`) để tra dữ kiện; soạn nháp câu 1.2, câu 1.4, A4 bước 2, HAZOP B4, checklist B5, runbook B7.5–B7.6 và mục `operations`/`legal` trong config; soạn phần giải thích con số để demo. Nam đọc lại, đối chiếu với `data/world.json` và chốt các con số. Các ngưỡng cảnh báo sớm (30 phút, 4 ca, 80% trần), thời hạn dừng 15 phút và tên kênh `#logix-refund-pilot-alerts` là bàn tự chọn, không có trong dữ liệu.
+
+### Bằng chứng
+
+- Commit `5639919`: Phiếu A câu 1.2, câu 1.4; thông tin P4 trong bảng thành viên.
+- Commit `2882ecb`: khôi phục cột Telemetry câu 1.4 (bản của Dương) bị mất khi merge.
+- Commit `a066507`: A4 bước 2, B4, B5, `config/operating_gates.json` mục `operations` và `legal`, Runbook B7.5–B7.6.
+- Lần chạy đối chiếu: `R-base-before-20261118-154922-e115de` (số base dùng trong B5, Runbook 2, B7.6).
+- Phiếu: `templates/form-a-criteria.md` (A1 câu 1.2, A4 bước 2); `templates/form-b-evaluation-gates.md` (B4, B5, dòng **(Nam)** ở B6, B7.5, B7.6).
+
+### Exit ticket
+
+- Một điều học được: cổng pháp lý chỉ đúng khi biết chính xác dữ liệu đi ra ngoài trông thế nào. Ghi `phone` vào danh sách chặn nghe đúng nhưng không chặn được gì, vì số điện thoại nằm bên trong trường `recipient_contact`; phải đọc code mới thấy.
+- Một điều còn chưa chắc: 1 người trực có đủ khi lượng ticket tăng gấp ba hay không. Ước tính cho thấy vẫn dưới sức 6 ca/giờ, nhưng nếu các ca chuyển người dồn vào cùng một lúc thì hàng chờ có thể vượt 60 phút, và thêm người cố định lại làm chi phí vượt ngưỡng đã ký; cần đo bằng eval khi có thẻ sự cố.
