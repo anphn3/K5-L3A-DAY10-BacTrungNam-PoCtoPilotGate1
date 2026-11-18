@@ -61,7 +61,8 @@ Dùng Claude (Claude Code) để: đọc README và code, soạn nháp phân cô
 
 ### Exit ticket
 
-*(điền cuối buổi)*
+- **Học được:** Tôi nhận ra rằng thêm một lớp kiểm soát (guard) không đồng nghĩa với việc hệ thống đã an toàn. Cụ thể, ở thẻ S6, cổng vòng 1 đã ngăn được 30/40 lỗi oan nhưng vẫn tự đưa ra phán đoán khi có hai kiện hàng cùng trễ. Khi dữ liệu chưa đủ để kết luận, hệ thống nên chuyển cho con người xử lý thay vì cố gắng đoán.
+- **Chưa chắc:** Nếu dữ liệu tracking từ hãng vận chuyển không chính xác, liệu các guard và monitoring hiện tại có đủ khả năng phát hiện lỗi và ngăn hệ thống quy trách nhiệm oan cho hãng không, vì hôm nay chúng tôi chưa kiểm chứng với dữ liệu thực tế có sai lệch từ phía carrier.
 
 ## NguyenThuyDuong-2A202603388
 
