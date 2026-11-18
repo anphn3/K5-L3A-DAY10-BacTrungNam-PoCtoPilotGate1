@@ -31,9 +31,9 @@ Mỗi lệnh `lab10.eval` và `lab10.grade` tự ghi một dòng vào `runs/jour
 | # | Mã lần chạy | Bộ ticket · mốc | Đổi MỘT thứ gì so với lần trước | pass_rate (khoảng tin cậy 95%) | pass_k | Hoàn sai (đ) · lỗi hãng oan · lộ dữ liệu | Tỉ lệ chuyển người | Kết luận (một câu) |
 |---|---|---|---|---|---|---|---|---|
 | 1 | `R-S6-prepared-20261118-162842-4b74a2` (grade `R-S6-grade-20261118-162842-4b74a2`; base `R-S6-before-20261118-162842-4b74a2`) | S6 · prepared | nhận thẻ đã bốc, chưa sửa thêm (đúng cổng vòng 1 đã chốt) | 0.8333 (base 0.3333) | 0.8333 (base 0.3333) | 270.000 · 10 · 0 (base 270.000 · 40 · 0) | 0.0 | Cổng vòng 1 đã giảm lỗi hãng oan 40 → 10 và nâng pass_rate 0.33 → 0.83, nhưng chưa chặn được hoàn sai 270.000đ, còn 10 lỗi oan và ROI 0.74 < 1.0 |
-| 2 | | Sx · after | | | | | | |
-| 3 | | Sx · after | | | | | | |
-| 4 | | base · after | (kiểm không regression) | | | | | |
+| 2 | `R-S6-after-20261118-163806-59b0b8` | S6 · after | Đổi MỘT thứ (code, `write_gate`): khi đơn có ≥ 2 kiện cùng đủ điều kiện quy lỗi hãng mà ticket không nêu kiện thì `escalate` TRƯỚC `issue_refund` (không đoán); lỗi hãng chỉ ghi cho kiện khách nêu, hoặc kiện duy nhất đủ điều kiện. Kèm 2 monitor mới | 1.0 [1.0; 1.0] | 1.0 | 0 · 0 · 0 | 0.1667 | Hết 270.000đ hoàn sai và 10 lỗi oan còn lại; đổi lại 2/12 ticket chuyển người, ROI 0.74 → 1.08 vẫn ≥ 1.0 |
+| 3 | `R-S6-grade-20261118-163812-59b0b8` (after `R-S6-after-20261118-163813-59b0b8`) | S6 · after (lệnh 6) | Không đổi gì, chạy tự kiểm tra ba mốc | 1.0 | 1.0 | 0 · 0 · 0 | 0.1667 | visible ✅, regression ✅, monitor ✅; "Mọi ngưỡng đã ký đều đạt", không vượt trần. Integrity ❌ chỉ vì repo bàn không có thẻ S1–S5, S7, S8 (cách nhận thẻ chỉ chép thẻ của bàn) |
+| 4 | `R-base-after-20261118-163807-59b0b8` | base · after | (kiểm không regression) | 1.0 [1.0; 1.0] | 1.0 | 0 · 0 · 0 | 0.2273 | Bộ nền giữ nguyên như prepared: không ca nào mới hỏng, chi phí 4.187đ, ROI 1.39 |
 
 ---
 
