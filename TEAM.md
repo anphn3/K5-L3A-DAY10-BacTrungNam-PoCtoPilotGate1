@@ -40,14 +40,24 @@ Trưởng nhóm, Kỹ sư cổng A (P1), theo phân công trong `TASKS.md`:
 
 - Thiết kế offline metric cho bước ghi lỗi hãng (câu 1.3), dựa trên sự kiện `file_carrier_fault`, `tracking` và nhãn `label.faults`.
 - Phát hiện và sửa lỗi xuống dòng CRLF trên máy chạy lệnh (`core.autocrlf`), lỗi này làm cả 19 file bị khoá lệch hash so với `lab10/MANIFEST.json`.
+- Ký tiêu chí, chạy mọi lệnh đo của bàn (base, after, prepared, chốt vòng 1, grade S6, gom bài).
+- Vòng 1: `write_gate` (tính lại tiền hoàn, lỗi hãng, payload báo hãng từ nguồn sự thật): bộ nền 0.9909 → 1.0, hoàn sai 20.000đ → 0, lỗi oan 1 → 0.
+- Vòng 2 (thẻ S6): `write_gate` không đoán kiện khi ≥ 2 kiện cùng đủ điều kiện quy lỗi; 2 monitor `ambiguous_multi_parcel_rate`, `fault_on_ontime_parcel`. Gói S6: lỗi oan 40 → 10 → 0, hoàn sai 270.000đ → 0, ROI 0.74 → 1.08.
+- Phiếu: A2 (1.3), A3 (1.5), A5, B0, B1, B6 (2 dòng **(An)**), B7.1 cổng 2–3, B8 phần số liệu, C0, C1, C7, C8, mục "Hạn chế và khó khăn" cuối Phiếu C.
+
+### Khó khăn
+
+- **Repo bàn chỉ có thẻ S6, thiếu S1–S5, S7, S8.** Thẻ phát qua repo thẻ riêng, README repo đó và luật 6 chỉ cho lấy thẻ của bàn mình; link repo thẻ đóng sau giờ phát. Vì `lab10/MANIFEST.json` liệt kê đủ 8 thẻ, lệnh 6 trên máy bàn luôn báo `1 integrity ❌` do **thiếu file** (không phải bị sửa). 4 file S6 đã kiểm khớp hash trước khi chép. Đã ghi ở Phiếu C mục "Hạn chế và khó khăn" và báo Lab Coach.
+- Mạng tới GitHub chập chờn, nhiều lần phải push lại.
 
 ### Dùng AI
 
-Dùng Claude (Claude Code) để: đọc README và code, soạn nháp phân công (`TASKS.md`), câu 1.3, câu 1.5, bản nháp tiêu chí và câu tiêu chí A4, bản nháp pre-mortem B6. Mọi ngưỡng và quyết định do cả bàn đọc lại và chốt.
+Dùng Claude (Claude Code) để: đọc README và code, soạn nháp phân công (`TASKS.md`), câu 1.3, câu 1.5, bản nháp tiêu chí và câu tiêu chí A4, bản nháp pre-mortem B6, viết và kiểm thử `write_gate` vòng 1 và 2, viết 2 monitor, dò trace S6, điền C0/C1/C7/C8, kịch bản demo (`DEMO.md`), kiểm `submission.json`. Mọi ngưỡng và quyết định do cả bàn đọc lại và chốt.
 
 ### Bằng chứng
 
-Mã commit, mã lần chạy (`runs/<mã>`), dòng trong phiếu. *(điền dần trong buổi)*
+- Commit: ký tiêu chí `bcd0a06`; `write_gate` vòng 1 `3675755`; chốt vòng 1 `8cd3e01` (hash `7365d885`); nhận thẻ `661635b`; vòng 2 S6 `cee788c`; bài nộp `1899a58`.
+- Mã lần chạy: base `R-base-before-20261118-154922-e115de` · after `R-base-after-20261118-160208-4b74a2` · prepared `R-base-prepared-20261118-161233-4b74a2` · S6 after `R-S6-after-20261118-163806-59b0b8` · grade `R-S6-grade-20261118-163815-59b0b8`.
 
 ### Exit ticket
 
