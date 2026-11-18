@@ -26,7 +26,7 @@ Repo: `K5-L3A-DAY10-BacTrungNam-PoCtoPilotGate1` · Đọc kỹ `README.md` mụ
 | Ai | Việc | Xong khi |
 |---|---|---|
 | P1 | Mời 3 bạn và team chấm (quyền Read) vào repo. Push `TEAM.md` và `TASKS.md` | Cả nhóm thấy repo |
-| P2, P3, P4 | `git clone`, `git remote add upstream ...`, `git config user.name "<MSSV mình>"`, `git config user.email "<MSSV mình>@example.com"` | `git remote -v` có `origin` và `upstream` |
+| P2, P3, P4 | `git clone`, `git remote add upstream ...`, `git config user.name "2A202603375"`, `git config user.email "2A202603375@example.com"` (README bước 2b: dùng **MSSV trưởng nhóm** trên mọi máy; đóng góp cá nhân ghi trong `TEAM.md`) | `git remote -v` có `origin` và `upstream` |
 | Mọi người | `python -m unittest discover -s tests` | `Ran 13 tests ... OK` |
 | P2, P3, P4 | Gửi MSSV cho P1 để điền `TEAM.md` | Bảng đủ MSSV |
 
