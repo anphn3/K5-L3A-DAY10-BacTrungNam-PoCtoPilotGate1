@@ -125,7 +125,9 @@ Sản phẩm và kinh doanh (P3), theo phân công trong `TASKS.md`:
 - Cổng kinh doanh (B7.4): `daily_refund_cap_vnd` 2.000.000đ (ngân sách Finance), `cost_budget_per_ticket_vnd` 1.500đ (trần LLM), `pilot_scope` all 100%, `roi_min` 1,0; đối chiếu với số base (chi phí 4.203đ/ticket, ROI 1,34; nhóm ticket không xác định kho 10.359đ/ticket, đắt hơn làm tay).
 - Pre-mortem (B6): thêm lý do drift chính sách v4 (lăng kính Kinh doanh), đưa vào Risk register và đặt ngày quyết định lại trước 2026-11-30.
 - Nhận ra chỉ số an toàn ở base trượt nhưng **chưa áp được "Dừng"** vì `decision_rule` ghi "sau khi đã sửa"; quyết định v1 phải dựa trên mốc prepared.
-
+- Quyết định v1 (B8): chọn **Thu hẹp** theo đúng chữ `decision_rule` đã ký: bộ nền đạt cả 9 ngưỡng nhưng dòng "Tiếp tục" đòi đạt cả trên gói sự cố (chưa đo); cắt loại ticket mã đơn không tồn tại (10.200đ/ticket, đắt hơn làm tay). Kiểm tra code `lab10/ops.py` thấy `pilot_scope` không cắt được loại ticket này nên ghi rõ phải cắt bằng cổng `pre_guard`.
+- Thẻ S6 (C3.2, C5): đọc trace `S6-01@11`, `S6-20@11`, `S6-40@11`, chỉ ra hệ thống coi "đơn" (kiện đầu tiên `parcels[0]`) là đơn vị chịu lỗi trong khi hãng và kế toán tính theo kiện/tài xế; viết specification ghi lỗi theo đúng kiện, không đoán khi không xác định được kiện, và giả định môi trường "mỗi đơn do một hãng giao trọn".
+- Quyết định v2 (C12): giữ **Thu hẹp** dù report cho phép cân nhắc Tiếp tục, vì kho HCM 5.617đ/ticket vượt ngưỡng đã ký 5.000đ, toàn bộ do loại ticket không xác định được kiện chịu lỗi (`S6-20`, `S6-21`); cắt loại ticket đó thay vì cắt kho HCM. Viết ba dòng bắt buộc cho `submission.json`.
 ### Dùng AI
 
 Dùng Claude để: đọc đề và `data/world.json`, lập checklist việc của P3, soạn nháp câu 1.1, bản đồ dữ liệu B3, lý do cho các con số B7.4, lý do pre-mortem B6, nháp B8; hướng dẫn xử lý conflict Git. Em tự đối chiếu mọi con số với `data/world.json` và report của P1 (mã lần chạy base), và chỉ đưa vào phiếu những gì em giải thích được. Ngưỡng tiêu chí do cả bàn chốt.
@@ -135,11 +137,14 @@ Dùng Claude để: đọc đề và `data/world.json`, lập checklist việc c
 - Commit: `f5f5251` (B3 bản đồ dữ liệu + drift), `27a39dd` (B7.4 + `operating_gates.json` mục `business`), `55c676e` (A1 câu 1.1, MSSV), `fab6f76` (B7.4 đối chiếu số base), commit B6 thêm lý do drift v4.
 - Tiêu chí ký: commit `bcd0a06` (`Sign acceptance criteria`), hash tiêu chí `8433f76d`, `signed_by` Trần Thị Lý.
 - Lần chạy dùng để đối chiếu: `R-base-before-20261118-154922-e115de`.
-- Phiếu: A mục A1; B mục B3, B5 (dòng 2, 6, 9), B6 (dòng **(Lý)**), B7.4, B8; C mục C5, C12 *(điền tiếp ở vòng 2)*.
+- Lần chạy dùng cho quyết định: v1 `R-base-prepared-20261118-161233-4b74a2` (hash cổng vòng 1 `7365d885`); v2 thẻ S6 base `R-S6-before-20261118-163815-59b0b8` · prepared `R-S6-prepared-20261118-163816-59b0b8` · after `R-S6-after-20261118-163816-59b0b8`, grade `R-S6-grade-20261118-163815-59b0b8`; bộ nền after `R-base-after-20261118-163807-59b0b8`.
+- Trace đã đọc: `S6-01@11`, `S6-20@11`, `S6-40@11` (mốc base).
+- Phiếu: A mục A1 (câu 1.1); B mục B3, B5 (dòng 2, 6, 9), B6 (dòng **(Lý)**), B7.4, B8 (v1); C mục C3.2, C5 (câu 3.2, 3.3), C12 (v2 + ba dòng bắt buộc).
 
 ### Exit ticket
 
-*(điền cuối buổi)*
+- Một điều học được: tiêu chí phải viết và ký trước khi xem số, và quyết định phải bám đúng chữ đã ký; một dòng "Tiếp tục" có thêm vế "VÀ trên gói sự cố" làm quyết định v1 khác hẳn dù bộ nền đạt hết. Con số trung bình đạt vẫn có thể che một phân khúc vượt ngưỡng (kho HCM 5.617đ/ticket).
+- Một điều còn chưa chắc: ROI trên thẻ S6 chỉ 1,08, sát ngưỡng 1,0; nếu ngoài thực tế đơn tách kiện mà khách không nêu kiện nhiều hơn mock thì số ca chuyển người tăng và ROI có thể xuống dưới 1,0. Bộ test ẩn cũng chưa đo.
 
 ## PhiHoangNam-2A202603435
 
