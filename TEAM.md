@@ -66,9 +66,31 @@ Kỹ sư cổng B (P2), theo phân công trong `TASKS.md`:
 
 ### Đóng góp cụ thể
 
+- Bổ sung telemetry production ở Phiếu A câu 1.4: phát hiện lệnh ghi lỗi hãng thiếu căn cứ, xác định dữ liệu không cần nhãn, công thức, điểm mù và đề xuất ngưỡng cảnh báo để nhóm thống nhất.
+- Phân tích `T-002@55` ở B2: tìm bước `model_override` dùng lời khách khai 5 ngày thay tracking 2 ngày, dẫn tới hoàn sai 20.000đ và ghi lỗi oan VNX. Phân biệt lỗi nguồn với hai hậu quả.
+- Đóng góp lý do pre-mortem B6 và đề xuất cổng; viết hai bước tránh rò rỉ dữ liệu đánh giá ở B7.2, tách kết quả trên bộ dùng để sửa khỏi bằng chứng đánh giá độc lập.
+- Xây dựng `pre_guard` vòng 1: chuẩn hóa yêu cầu giao trễ theo tracking; chuyển yêu cầu giao trễ có ghi chú checkout tự do sang người trước khi LLM đọc. Phối hợp với `write_gate` của An; ghi rõ rủi ro tăng hàng chờ và giới hạn nhận diện ngôn ngữ.
+- Viết tính chất và hai ticket hiểm B7.3, chạy trace: khai trễ 19 ngày trên đơn DB trễ 2 ngày không được hoàn; chỉ thị bỏ qua chính sách không làm hoàn toàn bộ tiền hàng, chỉ hoàn đúng phí ship 25.000đ. Kiểm tra thêm ghi chú checkout bằng world sao chép trong bộ nhớ; chạy 13 test công khai, tất cả OK.
+- Với S6, phân tích trace base/prepared, điền C2 và C3.2; xây dựng fault tree C6/C9 với ba nhánh: quy nhầm kiện, tự đoán khi nhiều kiện cùng đủ điều kiện, tích lũy lỗi vượt trần. Nêu rõ prepared đã chặn nhánh A/C, vòng 2 xử lý B trước khi ghi tiền, và rủi ro còn lại ở nguồn tracking, người duyệt, tích lũy nhiều ngày.
+- Đã rà soát phần phân tích với nhóm. Bản sửa `write_gate` vòng 2 và hai monitor do An triển khai; số liệu eval/grade do An chạy trên máy chính, em dẫn lại trong phiếu và không nhận là phần code hoặc lần chạy của mình.
+
+### Dùng AI
+
+Dùng ChatGPT/Codex hỗ trợ đọc đề/code, viết và sửa `pre_guard`, chạy test/trace, soạn các mục phiếu được giao và thao tác Git. Em đã rà soát nội dung; ngưỡng và quyết định cuối cùng do nhóm thống nhất.
+
 ### Bằng chứng
 
+- `b68b00c`: thông tin cá nhân và telemetry câu 1.4 trong Phiếu A.
+- `05b9230`: B2, phân tích trace `T-002@55`.
+- `63b8efd`: B6 và B7.2, gộp đóng góp với phần của nhóm.
+- `24a42bc`: `pre_guard`, B7.1/B7.3 và kết quả hai ticket `ADHOC-1@55` (`O-1002`) / `ADHOC-1@11` (`O-1001`); 13 test công khai OK tại thời điểm kiểm.
+- `27143bb`: C2, C3.2, C6, C9. Trace base: `S6-01@11`, `S6-20@11`, `S6-42@11`; trace prepared đã đối chiếu: `S6-01`, `S6-04`, `S6-20`, `S6-21`, `S6-43` ở seed 11.
+- Report P1 cung cấp để đối chiếu: prepared `R-S6-prepared-20261118-162842-4b74a2`, after `R-S6-after-20261118-163806-59b0b8`. C0 ghi hoàn sai 270.000đ → 0, lỗi oan 10 → 0, pass_rate 0.8333 → 1.0; đây là kết quả chung của hệ thống, không phải tác động riêng của `pre_guard`.
+
 ### Exit ticket
+
+- Điều học được: vị trí đặt cổng quan trọng như điều kiện kiểm tra. Với S6-20/S6-21, nếu có nhiều kiện đủ điều kiện mà chưa rõ khách yêu cầu kiện nào thì phải chuyển người trước `issue_refund`; chặn ở `file_carrier_fault` là quá muộn vì tiền đã ghi. Kết quả base, prepared và after giúp phân biệt phần chuẩn bị trước với phần sửa sau sự cố.
+- Điều còn chưa chắc: tracking và định danh kiện có đủ chính xác khi pilot thật hay không, và người duyệt có chịu được tải ca mơ hồ tăng lên không. Trần 2 lỗi/hãng/ngày chưa ngăn được tích lũy qua nhiều ngày; cần đo thêm thời gian chờ, chất lượng quyết định của người duyệt và đối soát cửa sổ 7 ngày.
 
 ## TranThiLy-2A202603404
 
